@@ -1,0 +1,84 @@
+﻿@model Web.Application.Models.Salary
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Salary</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            Employee
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.EmployeeNavigation.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            Purchase
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ForPurchase)
+        </dd>
+        <dt class = "col-sm-2">
+            Production
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ForProduction)
+        </dd>
+        <dt class = "col-sm-2">
+            Sale
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ForSale)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.General)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.General)
+        </dd>
+        <dt class = "col-sm-2">
+            Before Salary
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.BeforeSalary)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Bonus)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Bonus)
+        </dd>
+        <dt class = "col-sm-2">
+            After Salary
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.AfterSalary)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Issued)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Issued)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Year)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Year)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MonthNavigation)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.MonthNavigation.Name)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
