@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -18,58 +15,47 @@ namespace Web.Application.Controllers
         {
             _context = context;
         }
-
-        // GET: Materials
+        
         public async Task<IActionResult> Index()
         {
-            var dataBaseContext = _context.Materials.Include(m => m.UnitNavigation);
-            return View(await dataBaseContext.ToListAsync());
+            List<Material> materials = await _context.Materials
+                .FromSqlRaw("Material_Select")
+                .ToListAsync();
+
+            return View(materials);
         }
-
-        // GET: Materials/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Materials == null)
-            {
-                return NotFound();
-            }
-
-            var material = await _context.Materials
-                .Include(m => m.UnitNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (material == null)
-            {
-                return NotFound();
-            }
-
-            return View(material);
-        }
-
-        // GET: Materials/Create
+        
         public IActionResult Create()
         {
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id");
+            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Name");
             return View();
         }
-
-        // POST: Materials/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Unit,Count,Amount,Cost")] Material material)
+        public async Task<IActionResult> Create(Material material)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(material);
-                await _context.SaveChangesAsync();
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@name", material.Name),
+                    new SqlParameter("@unit", Convert.ToInt32(material.Unit)),
+                    new SqlParameter("@count", material.Count),
+                    new SqlParameter("@amount", material.Amount)
+                };
+
+                await _context.Database
+                    .ExecuteSqlRawAsync("EXEC Material_Insert @name, @unit, @count, @amount",
+                        sqlParameters.ToArray());
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id", material.Unit);
+            
+            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Name", material.Unit);
             return View(material);
         }
-
-        // GET: Materials/Edit/5
+        
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Materials == null)
@@ -77,21 +63,25 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            var material = await _context.Materials.FindAsync(id);
-            if (material == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id", material.Unit);
+                new SqlParameter("@id", id)
+            };
+
+            List<Material> materials = await _context.Materials
+                .FromSqlRaw("EXEC Material_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Material material = materials.FirstOrDefault()!;
+
+            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Name", material.Unit);
             return View(material);
         }
-
-        // POST: Materials/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Unit,Count,Amount,Cost")] Material material)
+        public async Task<IActionResult> Edit(int id, Material material)
         {
             if (id != material.Id)
             {
@@ -102,8 +92,18 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    _context.Update(material);
-                    await _context.SaveChangesAsync();
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("@id", id),
+                        new SqlParameter("@name", material.Name),
+                        new SqlParameter("@unit", material.Unit),
+                        new SqlParameter("@count", material.Count),
+                        new SqlParameter("@amount", material.Amount)
+                    };
+
+                    await _context.Database
+                        .ExecuteSqlRawAsync("EXEC Material_Update @id, @name, @unit, @count, @amount",
+                            sqlParameters.ToArray());
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -118,11 +118,11 @@ namespace Web.Application.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            
             ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id", material.Unit);
             return View(material);
         }
-
-        // GET: Materials/Delete/5
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Materials == null)
@@ -130,18 +130,21 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            var material = await _context.Materials
-                .Include(m => m.UnitNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (material == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
+                new SqlParameter("@id", id)
+            };
+
+            List<Material> materials = await _context.Materials
+                .FromSqlRaw("EXEC Material_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Material material = materials.FirstOrDefault()!;
 
             return View(material);
         }
-
-        // POST: Materials/Delete/5
+        
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -162,7 +165,17 @@ namespace Web.Application.Controllers
 
         private bool MaterialExists(int id)
         {
-          return (_context.Materials?.Any(e => e.Id == id)).GetValueOrDefault();
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
+            {
+                new SqlParameter("@id", id)
+            };
+
+            List<Material> materials = _context.Materials
+                .FromSqlRaw("EXEC Material_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToList();
+            
+            return materials.FirstOrDefault() == null ;
         }
     }
 }

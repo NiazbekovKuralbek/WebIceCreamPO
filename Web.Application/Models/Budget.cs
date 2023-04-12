@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using Web.Application.Data;
 
 namespace Web.Application.Models
 {
-    public partial class Budget
+    public class Budget
     {
         public int Id { get; set; }
         public double? BudgetAmount { get; set; }

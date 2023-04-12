@@ -8,40 +8,68 @@
 
 <p>
     <a asp-action="Create">Create New</a>
+    Product
+    @using (Html.BeginForm("Index", "Ingredients")) {
+    
+        @Html.DropDownList("product", ViewBag.Product as SelectList, new {
+            onchange = "submit();"
+        });
+    
+    }
 </p>
 <table class="table">
     <thead>
-        <tr>
-            <th>
-                Product
-            </th>
-            <th>
-                Material
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Count)
-            </th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Product)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Material)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Count)
+        </th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+    @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.ProductNavigation.Name)
+                @Html.DisplayFor(modelItem => item.Product)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.MaterialNavigation.Name)
+                @Html.DisplayFor(modelItem => item.Material)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Count)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
-}
+    }
     </tbody>
 </table>
+
+
+
+@* <script type="text/javascript"> *@
+@*     $(function () { *@
+@*         var val = $("#selTab").val().split("$"); *@
+@*         setTab(val[0]); *@
+@*         $("#lblTypeValue").text(val[1]); *@
+@*     }); *@
+@* *@
+@*     function setTab(value) { *@
+@*         $('#myTabs a[href="#tab' + value + 'default"]').tab('show'); *@
+@*     } *@
+@* *@
+@*     function select_onchange(sel) { *@
+@*         var val = sel.value.split("$"); *@
+@*         setTab(val[0]); *@
+@*         $("#lblTypeValue").text(val[1]); *@
+@*     } *@
+@* *@
+@* </script> *@

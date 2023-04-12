@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -18,84 +19,89 @@ namespace Web.Application.Controllers
         {
             _context = context;
         }
-
-        // GET: Salaries
+        //не является рабочей версией
+        
         public async Task<IActionResult> Index()
         {
-            var dataBaseContext = _context.Salaries
-                .Include(s => s.EmployeeNavigation)
-                .Include(s => s.MonthNavigation);
+            List<Salary> salaries = await _context.Salaries
+              .FromSqlRaw("Salary_Select")
+              .ToListAsync();
 
-            return View(await dataBaseContext.ToListAsync());
+            return View(salaries);
         }
-
-        // GET: Salaries/Details/5
+        
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Salaries == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var salary = await _context.Salaries
-                .Include(s => s.EmployeeNavigation)
-                .Include(s => s.MonthNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (salary == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
+                new SqlParameter("@id", id),
+            };
 
+            List<Salary> salaries = await _context.Salaries
+                .FromSqlRaw("EXEC Salary_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Salary salary = salaries.FirstOrDefault()!;
+                
             return View(salary);
         }
-
-        // GET: Salaries/Create
+        
         public IActionResult Create()
         {
-            ViewData["Month"] = new SelectList(_context.Months, "Id", "Id");
+            ViewData["Month"] = new SelectList(_context.Months, "Id", "Name");
             return View();
         }
-
-        // POST: Salaries/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Employee,Year,Month,ForPurchase,ForProduction,ForSale,General,BeforeSalary,Bonus,AfterSalary,Issued")] Salary salary)
+        public async Task<IActionResult> Create(Salary salary)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(salary);
-                await _context.SaveChangesAsync();
+                await _context.Database
+                    .ExecuteSqlRawAsync("EXEC Salary_Insert");
+                
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Month"] = new SelectList(_context.Months, "Id", "Id", salary.Month);
+            
+            ViewData["Month"] = new SelectList(_context.Months, "Id", "Name", salary.Month);
+            
             return View(salary);
         }
-
-        // GET: Salaries/Edit/5
+        
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Salaries == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var salary = await _context.Salaries.FindAsync(id);
-            if (salary == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
-            ViewData["Month"] = new SelectList(_context.Months, "Id", "Id", salary.Month);
+                new SqlParameter("@id", id),
+            };
+
+            List<Salary> salaries = await _context.Salaries
+                .FromSqlRaw("EXEC Salary_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Salary salary = salaries.FirstOrDefault()!;
+            
+            ViewData["Month"] = new SelectList(_context.Months, "Id", "Name", salary.Month);
+            
             return View(salary);
         }
-
-        // POST: Salaries/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Employee,Year,Month,ForPurchase,ForProduction,ForSale,General,BeforeSalary,Bonus,AfterSalary,Issued")] Salary salary)
+        public async Task<IActionResult> Edit(int id,Salary salary)
         {
             if (id != salary.Id)
             {
@@ -106,8 +112,14 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    _context.Update(salary);
-                    await _context.SaveChangesAsync();
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        
+                    };
+
+                    await _context.Database
+                        .ExecuteSqlRawAsync("EXEC Salary_Update",
+                            sqlParameters.ToArray());
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -126,47 +138,9 @@ namespace Web.Application.Controllers
             return View(salary);
         }
 
-        // GET: Salaries/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Salaries == null)
-            {
-                return NotFound();
-            }
-
-            var salary = await _context.Salaries
-                .Include(s => s.MonthNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (salary == null)
-            {
-                return NotFound();
-            }
-
-            return View(salary);
-        }
-
-        // POST: Salaries/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Salaries == null)
-            {
-                return Problem("Entity set 'DataBaseContext.Salaries'  is null.");
-            }
-            var salary = await _context.Salaries.FindAsync(id);
-            if (salary != null)
-            {
-                _context.Salaries.Remove(salary);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
         private bool SalaryExists(int id)
         {
-          return (_context.Salaries?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Salaries?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

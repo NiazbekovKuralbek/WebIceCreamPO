@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -18,56 +19,41 @@ namespace Web.Application.Controllers
         {
             _context = context;
         }
-
-        // GET: Positions
+        
         public async Task<IActionResult> Index()
         {
-              return _context.Positions != null ? 
-                          View(await _context.Positions.ToListAsync()) :
-                          Problem("Entity set 'DataBaseContext.Positions'  is null.");
+            List<Position> positions = await _context.Positions
+              .FromSqlRaw("Position_Select")
+              .ToListAsync();
+
+            return View(positions);
         }
 
-        // GET: Positions/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Positions == null)
-            {
-                return NotFound();
-            }
-
-            var position = await _context.Positions
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (position == null)
-            {
-                return NotFound();
-            }
-
-            return View(position);
-        }
-
-        // GET: Positions/Create
         public IActionResult Create()
         {
             return View();
         }
-
-        // POST: Positions/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Position position)
+        public async Task<IActionResult> Create(Position position)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(position);
-                await _context.SaveChangesAsync();
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@name", position.Name)
+                };
+
+                await _context.Database
+                    .ExecuteSqlRawAsync("EXEC Position_Insert @name",
+                        sqlParameters.ToArray());
+                
                 return RedirectToAction(nameof(Index));
             }
             return View(position);
         }
-
-        // GET: Positions/Edit/5
+        
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Positions == null)
@@ -75,20 +61,24 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            var position = await _context.Positions.FindAsync(id);
-            if (position == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
+                new SqlParameter("@id", id),
+            };
+
+            List<Position> positions = await _context.Positions
+                .FromSqlRaw("EXEC Position_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Position position = positions.FirstOrDefault()!;
+            
             return View(position);
         }
-
-        // POST: Positions/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Position position)
+        public async Task<IActionResult> Edit(int id, Position position)
         {
             if (id != position.Id)
             {
@@ -99,8 +89,16 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    _context.Update(position);
-                    await _context.SaveChangesAsync();
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("@id", id),
+                        new SqlParameter("@name", position.Name)
+                    };
+
+                    await _context.Database
+                        .ExecuteSqlRawAsync("EXEC Position_Update @id, @name",
+                            sqlParameters.ToArray());
+                    
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -117,8 +115,7 @@ namespace Web.Application.Controllers
             }
             return View(position);
         }
-
-        // GET: Positions/Delete/5
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Positions == null)
@@ -126,38 +123,50 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            var position = await _context.Positions
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (position == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
+                new SqlParameter("@id", id),
+            };
+
+            List<Position> positions = await _context.Positions
+                .FromSqlRaw("EXEC Position_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Position position = positions.FirstOrDefault()!;
 
             return View(position);
         }
-
-        // POST: Positions/Delete/5
+        
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Positions == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return Problem("Entity set 'DataBaseContext.Positions'  is null.");
-            }
-            var position = await _context.Positions.FindAsync(id);
-            if (position != null)
-            {
-                _context.Positions.Remove(position);
-            }
+                new SqlParameter("@id", id),
+            };
+
+            await _context.Database
+                .ExecuteSqlRawAsync("EXEC Position_Delete @id",
+                    sqlParameters.ToArray());
             
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PositionExists(int id)
         {
-          return (_context.Positions?.Any(e => e.Id == id)).GetValueOrDefault();
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
+            {
+                new SqlParameter("@id", id),
+            };
+
+            List<Position> positions = _context.Positions
+                .FromSqlRaw("EXEC Position_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToList();
+
+            return positions.FirstOrDefault() == null;
         }
     }
 }

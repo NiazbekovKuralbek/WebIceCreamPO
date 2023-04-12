@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -18,157 +19,47 @@ namespace Web.Application.Controllers
         {
             _context = context;
         }
-
-        // GET: SaleProducts
+        
         public async Task<IActionResult> Index()
         {
-            var dataBaseContext = _context.SaleProducts.Include(s => s.EmployeeNavigation).Include(s => s.ProductNavigation);
-            return View(await dataBaseContext.ToListAsync());
+            List<SaleProduct> sales = await _context.SaleProducts
+              .FromSqlRaw("SaleProduct_Select")
+              .ToListAsync();
+
+            return View(sales);
         }
 
-        // GET: SaleProducts/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.SaleProducts == null)
-            {
-                return NotFound();
-            }
-
-            var saleProduct = await _context.SaleProducts
-                .Include(s => s.EmployeeNavigation)
-                .Include(s => s.ProductNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (saleProduct == null)
-            {
-                return NotFound();
-            }
-
-            return View(saleProduct);
-        }
-
-        // GET: SaleProducts/Create
         public IActionResult Create()
         {
-            ViewData["Employee"] = new SelectList(_context.Employees, "Id", "Id");
-            ViewData["Product"] = new SelectList(_context.Products, "Id", "Id");
+            ViewData["Employee"] = new SelectList(_context.Employees, "Id", "Name");
+            ViewData["Product"] = new SelectList(_context.Products, "Id", "Name");
             return View();
         }
-
-        // POST: SaleProducts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Product,Count,Amount,SaleDate,Employee")] SaleProduct saleProduct)
+        public async Task<IActionResult> Create(SaleProduct saleProduct)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(saleProduct);
-                await _context.SaveChangesAsync();
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@product", saleProduct.Product),
+                    new SqlParameter("@count", saleProduct.Count),
+                    new SqlParameter("@amount", saleProduct.Amount),
+                    new SqlParameter("@date", saleProduct.SaleDate),
+                    new SqlParameter("@employee", saleProduct.Employee)
+                };
+
+                await _context.Database
+                    .ExecuteSqlRawAsync("EXEC SaleProduct_Insert @product, @count, @amount, @date, @employee",
+                        sqlParameters.ToArray());
+                
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Employee"] = new SelectList(_context.Employees, "Id", "Id", saleProduct.Employee);
-            ViewData["Product"] = new SelectList(_context.Products, "Id", "Id", saleProduct.Product);
+            ViewData["Employee"] = new SelectList(_context.Employees, "Id", "Name", saleProduct.Employee);
+            ViewData["Product"] = new SelectList(_context.Products, "Id", "Name", saleProduct.Product);
             return View(saleProduct);
-        }
-
-        // GET: SaleProducts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.SaleProducts == null)
-            {
-                return NotFound();
-            }
-
-            var saleProduct = await _context.SaleProducts.FindAsync(id);
-            if (saleProduct == null)
-            {
-                return NotFound();
-            }
-            ViewData["Employee"] = new SelectList(_context.Employees, "Id", "Id", saleProduct.Employee);
-            ViewData["Product"] = new SelectList(_context.Products, "Id", "Id", saleProduct.Product);
-            return View(saleProduct);
-        }
-
-        // POST: SaleProducts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Product,Count,Amount,SaleDate,Employee")] SaleProduct saleProduct)
-        {
-            if (id != saleProduct.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(saleProduct);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!SaleProductExists(saleProduct.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["Employee"] = new SelectList(_context.Employees, "Id", "Id", saleProduct.Employee);
-            ViewData["Product"] = new SelectList(_context.Products, "Id", "Id", saleProduct.Product);
-            return View(saleProduct);
-        }
-
-        // GET: SaleProducts/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.SaleProducts == null)
-            {
-                return NotFound();
-            }
-
-            var saleProduct = await _context.SaleProducts
-                .Include(s => s.EmployeeNavigation)
-                .Include(s => s.ProductNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (saleProduct == null)
-            {
-                return NotFound();
-            }
-
-            return View(saleProduct);
-        }
-
-        // POST: SaleProducts/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.SaleProducts == null)
-            {
-                return Problem("Entity set 'DataBaseContext.SaleProducts'  is null.");
-            }
-            var saleProduct = await _context.SaleProducts.FindAsync(id);
-            if (saleProduct != null)
-            {
-                _context.SaleProducts.Remove(saleProduct);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool SaleProductExists(int id)
-        {
-          return (_context.SaleProducts?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

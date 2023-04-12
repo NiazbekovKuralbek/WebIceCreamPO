@@ -15,18 +15,6 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = E:\University\Система Управления БД\Web.Application\Web.Application
 build_property._RazorSourceGeneratorDebug = 
 
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Budgets/Create.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVkZ2V0c1xDcmVhdGUuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Budgets/Delete.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVkZ2V0c1xEZWxldGUuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Budgets/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVkZ2V0c1xEZXRhaWxzLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Budgets/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVkZ2V0c1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -41,10 +29,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Employees/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVzXERlbGV0ZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Employees/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Employees/Edit.cshtml]
@@ -111,10 +95,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUG9zaXRpb25zXERlbGV0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Positions/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUG9zaXRpb25zXERldGFpbHMuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Positions/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUG9zaXRpb25zXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -125,18 +105,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Productions/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdGlvbnNcQ3JlYXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Productions/Delete.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdGlvbnNcRGVsZXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Productions/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdGlvbnNcRGV0YWlscy5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Productions/Edit.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdGlvbnNcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Productions/Index.cshtml]
@@ -151,10 +119,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdHNcRGVsZXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Products/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdHNcRGV0YWlscy5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Products/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvZHVjdHNcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -167,28 +131,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHVyY2hhc2VNYXRlcmlhbHNcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/PurchaseMaterials/Delete.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHVyY2hhc2VNYXRlcmlhbHNcRGVsZXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/PurchaseMaterials/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHVyY2hhc2VNYXRlcmlhbHNcRGV0YWlscy5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/PurchaseMaterials/Edit.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHVyY2hhc2VNYXRlcmlhbHNcRWRpdC5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/PurchaseMaterials/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHVyY2hhc2VNYXRlcmlhbHNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Salaries/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsYXJpZXNcQ3JlYXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Salaries/Delete.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsYXJpZXNcRGVsZXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Salaries/Details.cshtml]
@@ -205,18 +153,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/SaleProducts/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZVByb2R1Y3RzXENyZWF0ZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/SaleProducts/Delete.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZVByb2R1Y3RzXERlbGV0ZS5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/SaleProducts/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZVByb2R1Y3RzXERldGFpbHMuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/SaleProducts/Edit.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2FsZVByb2R1Y3RzXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/SaleProducts/Index.cshtml]
@@ -237,10 +173,6 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Units/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVW5pdHNcRGVsZXRlLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[E:/University/Система Управления БД/Web.Application/Web.Application/Views/Units/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVW5pdHNcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/University/Система Управления БД/Web.Application/Web.Application/Views/Units/Edit.cshtml]

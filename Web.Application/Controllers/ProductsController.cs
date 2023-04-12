@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -18,58 +19,47 @@ namespace Web.Application.Controllers
         {
             _context = context;
         }
-
-        // GET: Products
+        
         public async Task<IActionResult> Index()
         {
-            var dataBaseContext = _context.Products.Include(p => p.UnitNavigation);
-            return View(await dataBaseContext.ToListAsync());
+            List<Product> products = await _context.Products
+              .FromSqlRaw("Product_Select")
+              .ToListAsync();
+
+            return View(products);
         }
 
-        // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Products == null)
-            {
-                return NotFound();
-            }
-
-            var product = await _context.Products
-                .Include(p => p.UnitNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
-        }
-
-        // GET: Products/Create
+        
         public IActionResult Create()
         {
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id");
+            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Name");
             return View();
         }
-
-        // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Unit,Count,Amount,Cost")] Product product)
+        public async Task<IActionResult> Create(Product product)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@name", product.Name),
+                    new SqlParameter("@unit", product.Unit),
+                    new SqlParameter("@count", product.Count),
+                    new SqlParameter("@amount", product.Amount),
+                };
+
+                await _context.Database
+                    .ExecuteSqlRawAsync("EXEC Product_Insert @name, @unit, @count, @amount",
+                        sqlParameters.ToArray());
+                
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id", product.Unit);
+            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Name", product.Unit);
             return View(product);
         }
-
-        // GET: Products/Edit/5
+        
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Products == null)
@@ -77,21 +67,25 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
+                new SqlParameter("@id", id)
+            };
+
+            List<Product> products = await _context.Products
+                .FromSqlRaw("EXEC Product_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Product product = products.FirstOrDefault()!;
+            
             ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id", product.Unit);
             return View(product);
         }
-
-        // POST: Products/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Unit,Count,Amount,Cost")] Product product)
+        public async Task<IActionResult> Edit(int id, Product product)
         {
             if (id != product.Id)
             {
@@ -102,8 +96,18 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("@id", id),
+                        new SqlParameter("@name", product.Name),
+                        new SqlParameter("@unit", product.Unit),
+                        new SqlParameter("@count", product.Count),
+                        new SqlParameter("@amount", product.Amount),
+                    };
+
+                    await _context.Database
+                        .ExecuteSqlRawAsync("EXEC Product_Update @id, @name, @unit, @count, @amount",
+                            sqlParameters.ToArray());
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -121,8 +125,7 @@ namespace Web.Application.Controllers
             ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id", product.Unit);
             return View(product);
         }
-
-        // GET: Products/Delete/5
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Products == null)
@@ -130,39 +133,50 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .Include(p => p.UnitNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (product == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
+                new SqlParameter("@id", id)
+            };
+
+            List<Product> products = await _context.Products
+                .FromSqlRaw("EXEC Product_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Product product = products.FirstOrDefault()!;
 
             return View(product);
         }
-
-        // POST: Products/Delete/5
+        
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Products == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return Problem("Entity set 'DataBaseContext.Products'  is null.");
-            }
-            var product = await _context.Products.FindAsync(id);
-            if (product != null)
-            {
-                _context.Products.Remove(product);
-            }
-            
-            await _context.SaveChangesAsync();
+                new SqlParameter("@id", id)
+            };
+
+            await _context.Database
+                .ExecuteSqlRawAsync("EXEC Product_Delete @id",
+                    sqlParameters.ToArray());
+
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductExists(int id)
         {
-          return (_context.Products?.Any(e => e.Id == id)).GetValueOrDefault();
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
+            {
+                new SqlParameter("@id", id)
+            };
+
+            List<Product> products = _context.Products
+                .FromSqlRaw("EXEC Product_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToList();
+
+            return products.FirstOrDefault() == null;
         }
     }
 }

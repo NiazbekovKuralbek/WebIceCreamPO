@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -13,92 +10,91 @@ namespace Web.Application.Controllers
     public class IngredientsController : Controller
     {
         private readonly DataBaseContext _context;
+        private static int _product;
 
         public IngredientsController(DataBaseContext context)
         {
             _context = context;
         }
-
-        // GET: Ingredients
-        public async Task<IActionResult> Index()
+        
+        public async Task<IActionResult> Index(int? product)
         {
-            var dataBaseContext = _context.Ingredients
-                .Include(i => i.MaterialNavigation)
-                .Include(i => i.ProductNavigation);
-            return View(await dataBaseContext.ToListAsync());
-        }
+            List<Product> products = await _context.Products
+                .FromSqlRaw("EXEC Product_Select")
+                .ToListAsync();
 
-        // GET: Ingredients/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Ingredients == null)
+            _product = product ?? products.FirstOrDefault()!.Id;
+            
+            List<SqlParameter> sqlParameters = new List<SqlParameter>
             {
-                return NotFound();
-            }
+                new SqlParameter("@product", _product)
+            };
 
-            var ingredient = await _context.Ingredients
-                .Include(i => i.MaterialNavigation)
-                .Include(i => i.ProductNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            List<Ingredient> ingredients = await _context.Ingredients
+                .FromSqlRaw("EXEC Ingredient_SelectByProduct @product",
+                    sqlParameters.ToArray())
+                .ToListAsync();
 
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
-
-            return View(ingredient);
+            ViewData["Product"] = new SelectList(_context.Products, "Id", "Name");
+            return View(ingredients);
         }
-
-        // GET: Ingredients/Create
+        
         public IActionResult Create()
         {
-            ViewData["Material"] = new SelectList(_context.Materials, "Id", "Id");
-            ViewData["Product"] = new SelectList(_context.Products, "Id", "Id");
+            ViewData["Material"] = new SelectList(_context.Materials, "Id", "Name");
             return View();
         }
-
-        // POST: Ingredients/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Product,Material,Count")] Ingredient ingredient)
+        public async Task<IActionResult> Create(Ingredient ingredient)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(ingredient);
-                await _context.SaveChangesAsync();
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@product", ingredient.Product),
+                    new SqlParameter("@material", ingredient.Material),
+                    new SqlParameter("@count", ingredient.Count)
+                };
+
+                await _context.Database
+                    .ExecuteSqlRawAsync("EXEC Ingredient_Insert @product, @material, @count",
+                        sqlParameters.ToArray());
+                
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Material"] = new SelectList(_context.Materials, "Id", "Id", ingredient.Material);
-            ViewData["Product"] = new SelectList(_context.Products, "Id", "Id", ingredient.Product);
+
             return View(ingredient);
         }
-
-        // GET: Ingredients/Edit/5
+        
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Ingredients == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var ingredient = await _context.Ingredients.FindAsync(id);
-            if (ingredient == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
-            ViewData["Material"] = new SelectList(_context.Materials, "Id", "Id", ingredient.Material);
-            ViewData["Product"] = new SelectList(_context.Products, "Id", "Id", ingredient.Product);
+                new SqlParameter("@id", id)
+            };
+
+            List<Ingredient> ingredients = await _context.Ingredients
+                .FromSqlRaw("EXEC Ingredient_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Ingredient ingredient = ingredients.FirstOrDefault()!;
+
+            ViewData["Material"] = new SelectList(_context.Materials, "Id", "Name", ingredient.Material);
+            ViewData["Product"] = new SelectList(_context.Products, "Id", "Name", ingredient.Product);
             return View(ingredient);
         }
 
-        // POST: Ingredients/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Product,Material,Count")] Ingredient ingredient)
+        public async Task<IActionResult> Edit(int id, Ingredient ingredient)
         {
             if (id != ingredient.Id)
             {
@@ -109,8 +105,18 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    _context.Update(ingredient);
-                    await _context.SaveChangesAsync();
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("@id", id),
+                        new SqlParameter("@product", ingredient.Product),
+                        new SqlParameter("@material", ingredient.Material),
+                        new SqlParameter("@count", ingredient.Count)
+                    };
+
+                    await _context.Database
+                        .ExecuteSqlRawAsync("EXEC Ingredient_Update @id, @product, @material, @count",
+                            sqlParameters.ToArray());
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -125,12 +131,13 @@ namespace Web.Application.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Material"] = new SelectList(_context.Materials, "Id", "Id", ingredient.Material);
-            ViewData["Product"] = new SelectList(_context.Products, "Id", "Id", ingredient.Product);
+            
+            ViewData["Material"] = new SelectList(_context.Materials, "Id", "Name");
+            ViewData["Product"] = new SelectList(_context.Products, "Id", "Name");
+            
             return View(ingredient);
         }
-
-        // GET: Ingredients/Delete/5
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Ingredients == null)
@@ -138,40 +145,50 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            var ingredient = await _context.Ingredients
-                .Include(i => i.MaterialNavigation)
-                .Include(i => i.ProductNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (ingredient == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
+                new SqlParameter("@id", id)
+            };
 
+            List<Ingredient> ingredients = await _context.Ingredients
+                .FromSqlRaw("EXEC Ingredient_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Ingredient ingredient = ingredients.FirstOrDefault()!;
+            
             return View(ingredient);
         }
-
-        // POST: Ingredients/Delete/5
+        
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Ingredients == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return Problem("Entity set 'DataBaseContext.Ingredients'  is null.");
-            }
-            var ingredient = await _context.Ingredients.FindAsync(id);
-            if (ingredient != null)
-            {
-                _context.Ingredients.Remove(ingredient);
-            }
-            
-            await _context.SaveChangesAsync();
+                new SqlParameter("@id", id)
+            };
+
+            await _context.Database
+                .ExecuteSqlRawAsync("EXEC Ingredient_Delete @id",
+                    sqlParameters.ToArray());
+
             return RedirectToAction(nameof(Index));
         }
 
         private bool IngredientExists(int id)
         {
-          return (_context.Ingredients?.Any(e => e.Id == id)).GetValueOrDefault();
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
+            {
+                new SqlParameter("@id", id)
+            };
+
+            List<Ingredient> ingredients = _context.Ingredients
+                .FromSqlRaw("EXEC Ingredient_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToList();
+            
+            return ingredients.FirstOrDefault() == null;
         }
     }
 }

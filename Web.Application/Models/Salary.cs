@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Web.Application.Models
 {
-    public partial class Salary
+    public class Salary
     {
         public int Id { get; set; }
         public int? Employee { get; set; }
@@ -17,8 +17,5 @@ namespace Web.Application.Models
         public double? Bonus { get; set; }
         public double? AfterSalary { get; set; }
         public string? Issued { get; set; }
-
-        public virtual Month? MonthNavigation { get; set; }
-        public virtual Employee? EmployeeNavigation { get; set; }
     }
 }

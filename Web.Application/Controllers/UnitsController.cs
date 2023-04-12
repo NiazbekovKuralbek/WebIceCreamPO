@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -18,77 +19,66 @@ namespace Web.Application.Controllers
         {
             _context = context;
         }
-
-        // GET: Units
+        
         public async Task<IActionResult> Index()
         {
-              return _context.Units != null ? 
-                          View(await _context.Units.ToListAsync()) :
-                          Problem("Entity set 'DataBaseContext.Units'  is null.");
+            List<Unit> units = await _context.Units
+                .FromSqlRaw("unit_Select")
+                .ToListAsync();
+
+            return View(units);
         }
-
-        // GET: Units/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Units == null)
-            {
-                return NotFound();
-            }
-
-            var unit = await _context.Units
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (unit == null)
-            {
-                return NotFound();
-            }
-
-            return View(unit);
-        }
-
-        // GET: Units/Create
+        
         public IActionResult Create()
         {
             return View();
         }
-
-        // POST: Units/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Unit unit)
+        public async Task<IActionResult> Create(Unit unit)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(unit);
-                await _context.SaveChangesAsync();
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@name", unit.Name)
+                };
+
+                await _context.Database
+                    .ExecuteSqlRawAsync("EXEC Unit_Insert @name",
+                        sqlParameters.ToArray());
+                
                 return RedirectToAction(nameof(Index));
             }
             return View(unit);
         }
-
-        // GET: Units/Edit/5
+        
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Units == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var unit = await _context.Units.FindAsync(id);
-            if (unit == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
+                new SqlParameter("@id", id)
+            };
+
+            List<Unit> units = await _context.Units
+                .FromSqlRaw("EXEC Unit_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Unit unit = units.FirstOrDefault()!;
+            
             return View(unit);
         }
-
-        // POST: Units/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Unit unit)
+        public async Task<IActionResult> Edit(int id, Unit unit)
         {
             if (id != unit.Id)
             {
@@ -99,8 +89,16 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    _context.Update(unit);
-                    await _context.SaveChangesAsync();
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("@id", id),
+                        new SqlParameter("@name", unit.Name)
+                    };
+
+                    await _context.Database
+                        .ExecuteSqlRawAsync("EXEC Unit_Update @id, @name",
+                            sqlParameters.ToArray());
+                    
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -117,47 +115,48 @@ namespace Web.Application.Controllers
             }
             return View(unit);
         }
-
-        // GET: Units/Delete/5
+        
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Units == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var unit = await _context.Units
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (unit == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return NotFound();
-            }
+                new SqlParameter("@id", id)
+            };
+
+            List<Unit> units = await _context.Units
+                .FromSqlRaw("EXEC Unit_SelectById @id",
+                    sqlParameters.ToArray())
+                .ToListAsync();
+
+            Unit unit = units.FirstOrDefault()!;
 
             return View(unit);
         }
-
-        // POST: Units/Delete/5
+        
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Units == null)
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
             {
-                return Problem("Entity set 'DataBaseContext.Units'  is null.");
-            }
-            var unit = await _context.Units.FindAsync(id);
-            if (unit != null)
-            {
-                _context.Units.Remove(unit);
-            }
-            
-            await _context.SaveChangesAsync();
+                new SqlParameter("@id", id)
+            };
+
+            await _context.Database
+                .ExecuteSqlRawAsync("EXEC Unit_Delete @id",
+                    sqlParameters.ToArray());
+
             return RedirectToAction(nameof(Index));
         }
 
         private bool UnitExists(int id)
         {
-          return (_context.Units?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Units?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

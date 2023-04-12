@@ -25,17 +25,15 @@
                 @Html.DisplayNameFor(model => model.SaleDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.EmployeeNavigation)
+                @Html.DisplayNameFor(model => model.Employee)
             </th>
-            
-            <th></th>
         </tr>
     </thead>
     <tbody>
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.ProductNavigation.Name)
+                @Html.DisplayFor(modelItem => item.Product)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Count)
@@ -47,12 +45,7 @@
                 @Html.DisplayFor(modelItem => item.SaleDate)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.EmployeeNavigation.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                @Html.DisplayFor(modelItem => item.Employee)
             </td>
         </tr>
 }
