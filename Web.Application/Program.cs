@@ -1,14 +1,20 @@
 using Microsoft.EntityFrameworkCore;
+using System.Web.Mvc;
+using Web.Application;
 using Web.Application.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<DataBaseContext>(options => 
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 var app = builder.Build();
+var supportedCultures = new[] { "en-GB" };
+var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
+app.UseRequestLocalization(localizationOptions);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -28,5 +34,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+DataBaseContext.OpenConnection();
 
 app.Run();

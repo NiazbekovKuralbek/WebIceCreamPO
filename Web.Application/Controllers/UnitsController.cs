@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,79 +9,95 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
+using Web.Application.ViewModels;
 
 namespace Web.Application.Controllers
 {
     public class UnitsController : Controller
     {
-        private readonly DataBaseContext _context;
+        private string? _query;
 
-        public UnitsController(DataBaseContext context)
+        public IActionResult Index()
         {
-            _context = context;
-        }
-        
-        public async Task<IActionResult> Index()
-        {
-            List<Unit> units = await _context.Units
-                .FromSqlRaw("unit_Select")
-                .ToListAsync();
 
-            return View(units);
+            return View(UnitVM.GetUnits());
         }
-        
+
         public IActionResult Create()
         {
+
             return View();
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Unit unit)
+        public IActionResult Create(Unit Unit)
         {
             if (ModelState.IsValid)
             {
-                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                _query = "usp_Unit_Insert";
+                using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                 {
-                    new SqlParameter("@name", unit.Name)
-                };
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                await _context.Database
-                    .ExecuteSqlRawAsync("EXEC Unit_Insert @name",
-                        sqlParameters.ToArray());
-                
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("@name", Unit.Name),
+                    };
+
+                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                    sqlCommand.ExecuteNonQuery();
+                }
+
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(unit);
+
+            return View(Unit);
+
         }
-        
-        public async Task<IActionResult> Edit(int? id)
+
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
+            Unit Unit;
+            _query = "Unit_SelectById";
+            using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
-                new SqlParameter("@id", id)
-            };
+                sqlCommand.CommandType = CommandType.StoredProcedure;
 
-            List<Unit> units = await _context.Units
-                .FromSqlRaw("EXEC Unit_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToListAsync();
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@id", id)
+                };
 
-            Unit unit = units.FirstOrDefault()!;
-            
-            return View(unit);
+                sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+
+                using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                {
+                    reader.Read();
+
+                    Unit = new Unit()
+                    {
+                        Id = reader.GetInt32("Id"),
+                        Name = reader.GetString("Name"),
+                    };
+                }
+            }
+
+
+            return View(Unit);
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Unit unit)
+        public IActionResult Edit(int id, Unit Unit)
         {
-            if (id != unit.Id)
+            if (id != Unit.Id)
             {
                 return NotFound();
             }
@@ -89,74 +106,67 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    _query = "usp_Unit_Update";
+                    using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                     {
-                        new SqlParameter("@id", id),
-                        new SqlParameter("@name", unit.Name)
-                    };
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                    await _context.Database
-                        .ExecuteSqlRawAsync("EXEC Unit_Update @id, @name",
-                            sqlParameters.ToArray());
-                    
+                        List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                        {
+                            new SqlParameter("@id", id),
+                            new SqlParameter("@name", Unit.Name),
+                        };
+
+                        sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                        sqlCommand.ExecuteNonQuery();
+                    }
+
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!UnitExists(unit.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(unit);
+
+
+            return View(Unit);
         }
-        
-        public async Task<IActionResult> Delete(int? id)
+
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id)
-            };
+            Unit Unit = UnitVM.GetUnit(id);
 
-            List<Unit> units = await _context.Units
-                .FromSqlRaw("EXEC Unit_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToListAsync();
 
-            Unit unit = units.FirstOrDefault()!;
-
-            return View(unit);
+            return View(Unit);
         }
-        
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
+            _query = "usp_Unit_Delete";
+            using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
-                new SqlParameter("@id", id)
-            };
+                sqlCommand.CommandType = CommandType.StoredProcedure;
 
-            await _context.Database
-                .ExecuteSqlRawAsync("EXEC Unit_Delete @id",
-                    sqlParameters.ToArray());
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@id", id)
+                };
+
+                sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                sqlCommand.ExecuteNonQuery();
+            }
+
 
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool UnitExists(int id)
-        {
-            return (_context.Units?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

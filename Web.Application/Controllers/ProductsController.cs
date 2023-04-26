@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,86 +9,79 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
+using Web.Application.ViewModels;
 
 namespace Web.Application.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly DataBaseContext _context;
+        private string? _query;
 
-        public ProductsController(DataBaseContext context)
+        public IActionResult Index()
         {
-            _context = context;
-        }
-        
-        public async Task<IActionResult> Index()
-        {
-            List<Product> products = await _context.Products
-              .FromSqlRaw("Product_Select")
-              .ToListAsync();
 
-            return View(products);
+            return View(ProductVM.GetProducts());
         }
 
-        
         public IActionResult Create()
         {
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Name");
+
+            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name");
             return View();
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Product product)
+        public IActionResult Create(Product Product)
         {
             if (ModelState.IsValid)
             {
-                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                _query = "usp_Product_Insert";
+                using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                 {
-                    new SqlParameter("@name", product.Name),
-                    new SqlParameter("@unit", product.Unit),
-                    new SqlParameter("@count", product.Count),
-                    new SqlParameter("@amount", product.Amount),
-                };
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                await _context.Database
-                    .ExecuteSqlRawAsync("EXEC Product_Insert @name, @unit, @count, @amount",
-                        sqlParameters.ToArray());
-                
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("@name", Product.Name),
+                        new SqlParameter("@unit", Convert.ToInt32(Product.Unit)),
+                        new SqlParameter("@count", Product.Count),
+                        new SqlParameter("@amount", Product.Amount)
+                    };
+
+                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                    sqlCommand.ExecuteNonQuery();
+                }
+
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Name", product.Unit);
-            return View(product);
+
+
+            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name");
+            return View(Product);
+
         }
-        
-        public async Task<IActionResult> Edit(int? id)
+
+        public IActionResult Edit(int? id)
         {
-            if (id == null || _context.Products == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id)
-            };
+            Product Product = ProductVM.GetProduct(id);
 
-            List<Product> products = await _context.Products
-                .FromSqlRaw("EXEC Product_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToListAsync();
 
-            Product product = products.FirstOrDefault()!;
-            
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id", product.Unit);
-            return View(product);
+            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name", Product.Unit);
+            return View(Product);
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Product product)
+        public IActionResult Edit(int id, Product Product)
         {
-            if (id != product.Id)
+            if (id != Product.Id)
             {
                 return NotFound();
             }
@@ -96,87 +90,73 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    _query = "usp_Product_Update";
+                    using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                     {
-                        new SqlParameter("@id", id),
-                        new SqlParameter("@name", product.Name),
-                        new SqlParameter("@unit", product.Unit),
-                        new SqlParameter("@count", product.Count),
-                        new SqlParameter("@amount", product.Amount),
-                    };
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                    await _context.Database
-                        .ExecuteSqlRawAsync("EXEC Product_Update @id, @name, @unit, @count, @amount",
-                            sqlParameters.ToArray());
+                        List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                        {
+                            new SqlParameter("@id", id),
+                            new SqlParameter("@name", Product.Name),
+                            new SqlParameter("@unit", Product.Unit),
+                            new SqlParameter("@count", Product.Count),
+                            new SqlParameter("@amount", Product.Amount)
+                        };
+
+                        sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                        sqlCommand.ExecuteNonQuery();
+                    }
+
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id", product.Unit);
-            return View(product);
+
+
+            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name", Product.Unit);
+            return View(Product);
         }
-        
-        public async Task<IActionResult> Delete(int? id)
+
+        public IActionResult Delete(int? id)
         {
-            if (id == null || _context.Products == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id)
-            };
+            Product product = ProductVM.GetProduct(id);
+            Unit unit = UnitVM.GetUnit(product.Unit);
 
-            List<Product> products = await _context.Products
-                .FromSqlRaw("EXEC Product_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToListAsync();
 
-            Product product = products.FirstOrDefault()!;
-
+            ViewData["Unit"] = unit.Name;
             return View(product);
         }
-        
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
+            _query = "usp_Product_Delete";
+            using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
-                new SqlParameter("@id", id)
-            };
+                sqlCommand.CommandType = CommandType.StoredProcedure;
 
-            await _context.Database
-                .ExecuteSqlRawAsync("EXEC Product_Delete @id",
-                    sqlParameters.ToArray());
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@id", id)
+                };
+
+                sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                sqlCommand.ExecuteNonQuery();
+            }
+
 
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ProductExists(int id)
-        {
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id)
-            };
-
-            List<Product> products = _context.Products
-                .FromSqlRaw("EXEC Product_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToList();
-
-            return products.FirstOrDefault() == null;
         }
     }
 }

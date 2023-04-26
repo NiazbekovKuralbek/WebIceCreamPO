@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,79 +9,72 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
+using Web.Application.ViewModels;
 
 namespace Web.Application.Controllers
 {
     public class PositionsController : Controller
     {
-        private readonly DataBaseContext _context;
+        private string? _query;
 
-        public PositionsController(DataBaseContext context)
+        public IActionResult Index()
         {
-            _context = context;
-        }
-        
-        public async Task<IActionResult> Index()
-        {
-            List<Position> positions = await _context.Positions
-              .FromSqlRaw("Position_Select")
-              .ToListAsync();
 
-            return View(positions);
+            return View(PositionVM.GetPositions());
         }
 
         public IActionResult Create()
         {
+
             return View();
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Position position)
+        public IActionResult Create(Position Position)
         {
             if (ModelState.IsValid)
             {
-                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                _query = "usp_Position_Insert";
+                using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                 {
-                    new SqlParameter("@name", position.Name)
-                };
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                await _context.Database
-                    .ExecuteSqlRawAsync("EXEC Position_Insert @name",
-                        sqlParameters.ToArray());
-                
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("@name", Position.Name),
+                    };
+
+                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                    sqlCommand.ExecuteNonQuery();
+                }
+
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(position);
+
+            return View(Position);
+
         }
-        
-        public async Task<IActionResult> Edit(int? id)
+
+        public IActionResult Edit(int? id)
         {
-            if (id == null || _context.Positions == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id),
-            };
+            Position Position = PositionVM.GetPosition(id);
 
-            List<Position> positions = await _context.Positions
-                .FromSqlRaw("EXEC Position_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToListAsync();
 
-            Position position = positions.FirstOrDefault()!;
-            
-            return View(position);
+            return View(Position);
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Position position)
+        public IActionResult Edit(int id, Position Position)
         {
-            if (id != position.Id)
+            if (id != Position.Id)
             {
                 return NotFound();
             }
@@ -89,84 +83,67 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    _query = "usp_Position_Update";
+                    using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                     {
-                        new SqlParameter("@id", id),
-                        new SqlParameter("@name", position.Name)
-                    };
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                    await _context.Database
-                        .ExecuteSqlRawAsync("EXEC Position_Update @id, @name",
-                            sqlParameters.ToArray());
-                    
+                        List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                        {
+                            new SqlParameter("@id", id),
+                            new SqlParameter("@name", Position.Name),
+                        };
+
+                        sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                        sqlCommand.ExecuteNonQuery();
+                    }
+
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PositionExists(position.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(position);
+
+
+            return View(Position);
         }
-        
-        public async Task<IActionResult> Delete(int? id)
+
+        public IActionResult Delete(int? id)
         {
-            if (id == null || _context.Positions == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id),
-            };
+            Position position = PositionVM.GetPosition(id);
 
-            List<Position> positions = await _context.Positions
-                .FromSqlRaw("EXEC Position_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToListAsync();
-
-            Position position = positions.FirstOrDefault()!;
 
             return View(position);
         }
-        
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
+            _query = "usp_Position_Delete";
+            using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
-                new SqlParameter("@id", id),
-            };
+                sqlCommand.CommandType = CommandType.StoredProcedure;
 
-            await _context.Database
-                .ExecuteSqlRawAsync("EXEC Position_Delete @id",
-                    sqlParameters.ToArray());
-            
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@id", id)
+                };
+
+                sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                sqlCommand.ExecuteNonQuery();
+            }
+
+
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool PositionExists(int id)
-        {
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id),
-            };
-
-            List<Position> positions = _context.Positions
-                .FromSqlRaw("EXEC Position_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToList();
-
-            return positions.FirstOrDefault() == null;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Web.Application.Models.Ingredient>
+﻿@model IEnumerable<Web.Application.ViewModels.IngredientVM>
 
 @{
     ViewData["Title"] = "Index";
@@ -8,14 +8,13 @@
 
 <p>
     <a asp-action="Create">Create New</a>
-    Product
     @using (Html.BeginForm("Index", "Ingredients")) {
     
         @Html.DropDownList("product", ViewBag.Product as SelectList, new {
             onchange = "submit();"
         });
-    
     }
+    
 </p>
 <table class="table">
     <thead>
@@ -52,24 +51,3 @@
     }
     </tbody>
 </table>
-
-
-
-@* <script type="text/javascript"> *@
-@*     $(function () { *@
-@*         var val = $("#selTab").val().split("$"); *@
-@*         setTab(val[0]); *@
-@*         $("#lblTypeValue").text(val[1]); *@
-@*     }); *@
-@* *@
-@*     function setTab(value) { *@
-@*         $('#myTabs a[href="#tab' + value + 'default"]').tab('show'); *@
-@*     } *@
-@* *@
-@*     function select_onchange(sel) { *@
-@*         var val = sel.value.split("$"); *@
-@*         setTab(val[0]); *@
-@*         $("#lblTypeValue").text(val[1]); *@
-@*     } *@
-@* *@
-@* </script> *@

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,58 +9,50 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
+using Web.Application.ViewModels;
 
 namespace Web.Application.Controllers
 {
     public class SaleProductsController : Controller
     {
-        private readonly DataBaseContext _context;
+        private string? _query;
 
-        public SaleProductsController(DataBaseContext context)
+        public IActionResult Index()
         {
-            _context = context;
-        }
-        
-        public async Task<IActionResult> Index()
-        {
-            List<SaleProduct> sales = await _context.SaleProducts
-              .FromSqlRaw("SaleProduct_Select")
-              .ToListAsync();
-
-            return View(sales);
+            return View(SaleProductVM.GetSaleProducts());
         }
 
         public IActionResult Create()
         {
-            ViewData["Employee"] = new SelectList(_context.Employees, "Id", "Name");
-            ViewData["Product"] = new SelectList(_context.Products, "Id", "Name");
+            ViewData["Employee"] = new SelectList(EmployeeVM.GetEmployees(), "Id", "Name");
+            ViewData["Product"] = new SelectList(ProductVM.GetProducts(), "Id", "Name");
             return View();
         }
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(SaleProduct saleProduct)
+        public IActionResult Create(SaleProduct saleProduct)
         {
-            if (ModelState.IsValid)
+            _query = "usp_SaleProduct_Insert";
+            using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+
                 List<SqlParameter> sqlParameters = new List<SqlParameter>()
                 {
                     new SqlParameter("@product", saleProduct.Product),
                     new SqlParameter("@count", saleProduct.Count),
-                    new SqlParameter("@amount", saleProduct.Amount),
-                    new SqlParameter("@date", saleProduct.SaleDate),
+                    new SqlParameter("@saleDate", saleProduct.SaleDate),
                     new SqlParameter("@employee", saleProduct.Employee)
                 };
 
-                await _context.Database
-                    .ExecuteSqlRawAsync("EXEC SaleProduct_Insert @product, @count, @amount, @date, @employee",
-                        sqlParameters.ToArray());
-                
-                return RedirectToAction(nameof(Index));
+
+                sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                sqlCommand.ExecuteNonQuery();
             }
-            ViewData["Employee"] = new SelectList(_context.Employees, "Id", "Name", saleProduct.Employee);
-            ViewData["Product"] = new SelectList(_context.Products, "Id", "Name", saleProduct.Product);
-            return View(saleProduct);
+
+            return RedirectToAction(nameof(Index));
+            
         }
     }
 }

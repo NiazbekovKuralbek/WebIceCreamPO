@@ -2,86 +2,79 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using Web.Application.Data;
 using Web.Application.Models;
+using Web.Application.ViewModels;
 
 namespace Web.Application.Controllers
 {
     public class MaterialsController : Controller
     {
-        private readonly DataBaseContext _context;
+        private string? _query; 
 
-        public MaterialsController(DataBaseContext context)
+        public IActionResult Index()
         {
-            _context = context;
+            
+            return View(MaterialVM.GetMaterials());
         }
-        
-        public async Task<IActionResult> Index()
-        {
-            List<Material> materials = await _context.Materials
-                .FromSqlRaw("Material_Select")
-                .ToListAsync();
 
-            return View(materials);
-        }
-        
         public IActionResult Create()
         {
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Name");
+
+            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name");
             return View();
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Material material)
+        public IActionResult Create(Material material)
         {
             if (ModelState.IsValid)
             {
-                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                _query = "usp_Material_Insert";
+                using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                 {
-                    new SqlParameter("@name", material.Name),
-                    new SqlParameter("@unit", Convert.ToInt32(material.Unit)),
-                    new SqlParameter("@count", material.Count),
-                    new SqlParameter("@amount", material.Amount)
-                };
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                await _context.Database
-                    .ExecuteSqlRawAsync("EXEC Material_Insert @name, @unit, @count, @amount",
-                        sqlParameters.ToArray());
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("@name", material.Name),
+                        new SqlParameter("@unit", material.Unit),
+                        new SqlParameter("@count", material.Count),
+                        new SqlParameter("@amount", material.Amount)
+                    };
+
+                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                    sqlCommand.ExecuteNonQuery();
+                }
+
 
                 return RedirectToAction(nameof(Index));
             }
-            
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Name", material.Unit);
+
+            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name");
             return View(material);
+
         }
-        
-        public async Task<IActionResult> Edit(int? id)
+
+        public IActionResult Edit(int? id)
         {
-            if (id == null || _context.Materials == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id)
-            };
+            Material material = MaterialVM.GetMaterial(id);
 
-            List<Material> materials = await _context.Materials
-                .FromSqlRaw("EXEC Material_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToListAsync();
 
-            Material material = materials.FirstOrDefault()!;
-
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Name", material.Unit);
+            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name", material.Unit);
             return View(material);
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Material material)
+        public IActionResult Edit(int id, Material material)
         {
             if (id != material.Id)
             {
@@ -92,90 +85,72 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    _query = "usp_Material_Update";
+                    using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                     {
-                        new SqlParameter("@id", id),
-                        new SqlParameter("@name", material.Name),
-                        new SqlParameter("@unit", material.Unit),
-                        new SqlParameter("@count", material.Count),
-                        new SqlParameter("@amount", material.Amount)
-                    };
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                    await _context.Database
-                        .ExecuteSqlRawAsync("EXEC Material_Update @id, @name, @unit, @count, @amount",
-                            sqlParameters.ToArray());
+                        List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                        {
+                            new SqlParameter("@id", id),
+                            new SqlParameter("@name", material.Name),
+                            new SqlParameter("@unit", material.Unit),
+                            new SqlParameter("@count", material.Count),
+                            new SqlParameter("@amount", material.Amount)
+                        };
+
+                        sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                        sqlCommand.ExecuteNonQuery();
+                    }
+                        
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MaterialExists(material.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
                 return RedirectToAction(nameof(Index));
             }
-            
-            ViewData["Unit"] = new SelectList(_context.Units, "Id", "Id", material.Unit);
+
+            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name", material.Unit);
             return View(material);
         }
-        
-        public async Task<IActionResult> Delete(int? id)
+
+        public IActionResult Delete(int? id)
         {
-            if (id == null || _context.Materials == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id)
-            };
+            Material material = MaterialVM.GetMaterial(id);
+            Unit unit = UnitVM.GetUnit(material.Unit);
 
-            List<Material> materials = await _context.Materials
-                .FromSqlRaw("EXEC Material_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToListAsync();
 
-            Material material = materials.FirstOrDefault()!;
-
+            ViewData["Unit"] = unit.Name;
             return View(material);
         }
-        
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            if (_context.Materials == null)
+            _query = "usp_Material_Delete";
+            using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
-                return Problem("Entity set 'DataBaseContext.Materials'  is null.");
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@id", id)
+                };
+
+                sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                sqlCommand.ExecuteNonQuery();
             }
-            var material = await _context.Materials.FindAsync(id);
-            if (material != null)
-            {
-                _context.Materials.Remove(material);
-            }
-            
-            await _context.SaveChangesAsync();
+
+
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool MaterialExists(int id)
-        {
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id)
-            };
-
-            List<Material> materials = _context.Materials
-                .FromSqlRaw("EXEC Material_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToList();
-            
-            return materials.FirstOrDefault() == null ;
         }
     }
 }

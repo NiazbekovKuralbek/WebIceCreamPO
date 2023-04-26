@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,49 +9,36 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Web.Application.Data;
 using Web.Application.Models;
+using Web.Application.ViewModels;
 
 namespace Web.Application.Controllers
 {
     public class BudgetsController : Controller
     {
-        private readonly DataBaseContext _context;
 
-        public BudgetsController(DataBaseContext context)
+        private string? _query;
+        public IActionResult Index()
         {
-            _context = context;
+
+            return View(BudgetVM.GetBudgets());
         }
         
-        public async Task<IActionResult> Index()
-        {
-            List<Budget> budget = await _context.Budgets
-                .FromSqlRaw("Budget_Select")
-                .ToListAsync();
-
-            return View(budget);
-        }
-        
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id)
-            };
+            Budget budget = BudgetVM.GetBudget(id);
+                
 
-            List<Budget> budget = await _context.Budgets
-                .FromSqlRaw("EXEC Budget_SelectById @id", sqlParameters.ToArray())
-                .ToListAsync();
-
-            return View(budget.First());
+            return View(budget);
         }
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Budget budget)
+        public IActionResult Edit(int id, Budget budget)
         {
             if (id != budget.Id)
             {
@@ -61,23 +49,33 @@ namespace Web.Application.Controllers
             {
                 try
                 {
-                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    _query = "usp_Budget_Update";
+                    using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                     {
-                        new SqlParameter("@budget", budget.BudgetAmount),
-                        new SqlParameter("@percent", budget.Percent),
-                        new SqlParameter("@perks", budget.Perks)
-                    };
-                    
-                    await Task.Run(() => _context.Database
-                        .ExecuteSqlRawAsync(@"EXEC Budget_Update @budget, @percent, @perks", sqlParameters.ToArray()));
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
 
+                        List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                        {
+                            new SqlParameter("@budget", budget.BudgetAmount),
+                            new SqlParameter("@percent", budget.Percent),
+                            new SqlParameter("@perks", budget.Perks)
+                        };
+
+                        sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                        sqlCommand.ExecuteNonQuery();
+                    }
+                        
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     throw;
                 }
+
+
                 return RedirectToAction(nameof(Index));
             }
+
+
             return View(budget);
         }
     }

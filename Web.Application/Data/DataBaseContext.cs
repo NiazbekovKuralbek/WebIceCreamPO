@@ -1,128 +1,48 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 using Web.Application.Models;
 
 namespace Web.Application.Data;
 
-public partial class DataBaseContext : DbContext
+public partial class DataBaseContext
 {
-    public DataBaseContext() {}
+    public static SqlConnection Connection
+           = new SqlConnection("Data Source=ONIGIRI;Initial Catalog=IceCream;Persist Security Info=True;User ID=sa;Password=1111");
 
-    public DataBaseContext(DbContextOptions<DataBaseContext> options)
-        : base(options) {}
+    public static SqlCommand Command = null;
+    public static SqlDataReader Reader = null;
+    public static SqlDataAdapter Adapter = null;
 
-    public virtual DbSet<Budget> Budgets { get; set; } = null!;
-    public virtual DbSet<Employee> Employees { get; set; } = null!;
-    public virtual DbSet<Ingredient> Ingredients { get; set; } = null!;
-    public virtual DbSet<Material> Materials { get; set; } = null!;
-    public virtual DbSet<Month> Months { get; set; } = null!;
-    public virtual DbSet<Position> Positions { get; set; } = null!;
-    public virtual DbSet<Product> Products { get; set; } = null!;
-    public virtual DbSet<Production> Productions { get; set; } = null!;
-    public virtual DbSet<PurchaseMaterial> PurchaseMaterials { get; set; } = null!;
-    public virtual DbSet<Salary> Salaries { get; set; } = null!;
-    public virtual DbSet<SaleProduct> SaleProducts { get; set; } = null!;
-    public virtual DbSet<Unit> Units { get; set; } = null!;
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public static void OpenConnection()
     {
-        modelBuilder.Entity<Budget>(entity =>
+        try
         {
-            entity.ToTable("Budget");
-        });
-
-        modelBuilder.Entity<Employee>(entity =>
+            if (Connection.State == ConnectionState.Closed)
+            {
+                Connection.Open();
+                Console.WriteLine("The Connection is " + Connection.State.ToString());
+            }
+        }
+        catch (Exception ex)
         {
-            entity.Property(e => e.Address).HasMaxLength(50);
-
-            entity.Property(e => e.Name).HasMaxLength(50);
-
-            entity.Property(e => e.PhoneNumber).HasMaxLength(50);
-            
-        });
-
-        modelBuilder.Entity<Ingredient>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            //entity.HasIndex(e => new { e.Product, e.Material }, "duplicates")
-            //    .IsUnique();
-            
-        });
-
-        modelBuilder.Entity<Material>(entity =>
-        {
-            entity.Property(e => e.Cost)
-                .HasComputedColumnSql("(case when [Count]>(0) then [Amount]/[Count] else (0) end)", false);
-
-            entity.Property(e => e.Name).HasMaxLength(50);
-            
-        });
-
-        modelBuilder.Entity<Month>(entity =>
-        {
-            entity.Property(e => e.Name)
-                .HasMaxLength(15)
-                .IsFixedLength();
-        });
-
-        modelBuilder.Entity<Position>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(50);
-        });
-
-        modelBuilder.Entity<Product>(entity =>
-        {
-            entity.Property(e => e.Cost)
-                .HasComputedColumnSql("(case when [Count]>(0) then [Amount]/[Count] else (0) end)", false);
-
-            entity.Property(e => e.Name).HasMaxLength(50);
-            
-        });
-
-        modelBuilder.Entity<Production>(entity =>
-        {
-            entity.Property(e => e.ProductionDate)
-                .HasColumnType("date");
-
-        });
-
-        modelBuilder.Entity<PurchaseMaterial>(entity =>
-        {
-            entity.Property(e => e.PurchaseDate)
-                .HasColumnType("date");
-            
-        });
-
-        modelBuilder.Entity<Salary>(entity =>
-        {
-            entity.ToTable("Salary");
-
-            entity.HasIndex(e => new { e.Employee, e.Year, e.Month }, "uniqueSalary")
-                .IsUnique();
-
-            entity.Property(e => e.ForProduction).HasColumnName("forProduction");
-
-            entity.Property(e => e.ForPurchase).HasColumnName("forPurchase");
-
-            entity.Property(e => e.ForSale).HasColumnName("forSale");
-
-            entity.Property(e => e.Issued).HasMaxLength(50);
-
-        });
-
-        modelBuilder.Entity<SaleProduct>(entity =>
-        {
-            entity.Property(e => e.SaleDate).HasColumnType("date");
-            
-        });
-
-        modelBuilder.Entity<Unit>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(50);
-        });
-
-        OnModelCreatingPartial(modelBuilder);
+            Console.WriteLine("Connection failed " + ex.Message);
+        }
     }
 
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    public static void CloseConnection()
+    {
+        try
+        {
+            if (Connection.State == ConnectionState.Open)
+            {
+                Connection.Close();
+                Console.WriteLine("The Connection is " + Connection.State.ToString());
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Close connection error " + ex.Message);
+        }
+    }
 }

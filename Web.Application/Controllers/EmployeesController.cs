@@ -2,114 +2,92 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using Web.Application.Data;
 using Web.Application.Models;
+using Web.Application.ViewModels;
 
 namespace Web.Application.Controllers
 {
     public class EmployeesController : Controller
     {
-        private readonly DataBaseContext _context;
+        private string? _query;
+        public IActionResult Index()
+        {
 
-        public EmployeesController(DataBaseContext context)
-        {
-            _context = context;
+            return View(EmployeeVM.GetEmployees());
         }
         
-        public async Task<IActionResult> Index()
+        public IActionResult Create()
         {
-            List<Employee> employees = await _context.Employees
-                .FromSqlRaw("Employee_Select")
-                .ToListAsync();
-            
-            List<Position> positions = await _context.Positions
-                .FromSqlRaw("Position_Select")
-                .ToListAsync();
-            
-            
-            return View(employees);
-        }
-        
-        public async Task<IActionResult> Create()
-        {
-            List<Position> positions = await _context.Positions
-                .FromSqlRaw("Position_Select")
-                .ToListAsync();
-            
-            ViewData["Position"] = new SelectList(positions, "Id", "Name");
+
+            ViewData["Position"] = new SelectList(PositionVM.GetPositions(), "Id", "Name");
             return View();
         }
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Employee employee)
+        public IActionResult Create(Employee employee)
         {
             if (ModelState.IsValid)
             {
-                List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                _query = "usp_Employee_Insert";
+                using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                 {
-                    new SqlParameter("@name", employee.Name),
-                    new SqlParameter("@position", employee.Position),
-                    new SqlParameter("@salary", employee.Salary),
-                    new SqlParameter("@address", employee.Address),
-                    new SqlParameter("@phone", employee.PhoneNumber)
-                };
-                
-                await _context.Database
-                    .ExecuteSqlRawAsync(@"EXEC Employee_Insert @name, @position, @salary, @address, @phone",
-                        sqlParameters.ToArray());
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("@name", employee.Name),
+                        new SqlParameter("@position", employee.Position),
+                        new SqlParameter("@salary", employee.Salary),
+                        new SqlParameter("@address", employee.Address),
+                        new SqlParameter("@phone", employee.PhoneNumber)
+                    };
+
+                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                    sqlCommand.ExecuteNonQuery();
+                }
+
 
                 return RedirectToAction(nameof(Index));
             }
-            
-            List<Position> positions = await _context.Positions
-                .FromSqlRaw("Position_Select")
-                .ToListAsync();
-            
-            ViewData["Position"] = new SelectList(positions, "Id", "Name", employee.Position);
-            return View(employee);
+
+
+            ViewData["Position"] = new SelectList(PositionVM.GetPositions(), "Id", "Name");
+            return View();
         }
         
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            List<SqlParameter> sqlParameters = new List<SqlParameter>()
-            {
-                new SqlParameter("@id", id)
-            };
+            Employee employee = EmployeeVM.GetEmployee(id);
 
-            List<Employee> employees = await _context.Employees
-                .FromSqlRaw("EXEC Employee_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToListAsync();
 
-            Employee employee = employees.FirstOrDefault()!;
-
-            List<Position> positions = await _context.Positions
-                .FromSqlRaw("Position_Select")
-                .ToListAsync();
-            
-            ViewData["Position"] = new SelectList(positions, "Id", "Name", employee.Position);
+            ViewData["Position"] = new SelectList(PositionVM.GetPositions(), "Id", "Name", employee.Position);
             return View(employee);
         }
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Employee employee)
+        public IActionResult Edit(int id, Employee employee)
         {
             if (id != employee.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
+                _query = "usp_Employee_Update";
+                using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                 {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+
                     List<SqlParameter> sqlParameters = new List<SqlParameter>
                     {
                         new SqlParameter("@id", id),
@@ -120,84 +98,58 @@ namespace Web.Application.Controllers
                         new SqlParameter("@phone", employee.PhoneNumber)
                     };
 
-                    await _context.Database
-                        .ExecuteSqlRawAsync("EXEC Employee_Update @id, @name, @position, @salary, @address, @phone",
-                            sqlParameters.ToArray());
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EmployeeExists(employee.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                    sqlCommand.ExecuteNonQuery();
                 }
 
-                ViewData["Position"] = new SelectList(_context.Positions, "Id", "Name", employee.Position);
-                return RedirectToAction(nameof(Index));
             }
-            
-            
-            return View(employee);
+            catch (DbUpdateConcurrencyException)
+            {
+                return NotFound();
+            }
+
+
+            ViewData["Position"] = new SelectList(PositionVM.GetPositions(), "Id", "Name", employee.Position);
+            return RedirectToAction(nameof(Index));
         }
         
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-            
-            List<SqlParameter> sqlParameters = new List<SqlParameter>
-            {
-                new SqlParameter("id", id)
-            };
 
-            List<Employee> employees = await _context.Employees
-                .FromSqlRaw("EXEC Employee_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToListAsync();
+            Employee employee = EmployeeVM.GetEmployee(id);
+            Position position = PositionVM.GetPosition(employee.Position);
 
-            Employee employee = employees.FirstOrDefault()!;
 
+            ViewData["Position"] = position.Name;
             return View(employee);
         }
         
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Employee? employee)
+        public IActionResult DeleteConfirmed(Employee? employee)
         {
             if (employee != null)
             {
-                List<SqlParameter> sqlParameters = new List<SqlParameter>
+                _query = "usp_Employee_Delete";
+                using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                 {
-                    new SqlParameter("@id", employee.Id)
-                };
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                await _context.Database
-                    .ExecuteSqlRawAsync("EXEC Employee_Delete @id",
-                        sqlParameters.ToArray());
+                    List<SqlParameter> sqlParameters = new List<SqlParameter>
+                    {
+                        new SqlParameter("@id", employee.Id)
+                    };
+
+                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                    sqlCommand.ExecuteNonQuery();
+                }
             }
-            
+
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool EmployeeExists(int id)
-        {
-            List<SqlParameter> sqlParameters = new List<SqlParameter>
-            {
-                new SqlParameter("id", id)
-            };
-
-            List<Employee> employee = _context.Employees
-                .FromSqlRaw("EXEC Employee_SelectById @id",
-                    sqlParameters.ToArray())
-                .ToList();
-
-            return employee.FirstOrDefault() != null;
         }
     }
 }
