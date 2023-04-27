@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<Web.Application.ViewModels.IngredientVM>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Ингридиенты";
 }
 
-<h1>Index</h1>
+<h1>Информация о составе продукта</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Добавить в состав новый игридиент</a>
     @using (Html.BeginForm("Index", "Ingredients")) {
     
         @Html.DropDownList("product", ViewBag.Product as SelectList, new {
@@ -20,9 +20,6 @@
     <thead>
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.Product)
-        </th>
-        <th>
             @Html.DisplayNameFor(model => model.Material)
         </th>
         <th>
@@ -33,10 +30,7 @@
     </thead>
     <tbody>
     @foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Product)
-            </td>
+        <tr>    
             <td>
                 @Html.DisplayFor(modelItem => item.Material)
             </td>
@@ -44,8 +38,8 @@
                 @Html.DisplayFor(modelItem => item.Count)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Изменить</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Удалить</a>
             </td>
         </tr>
     }

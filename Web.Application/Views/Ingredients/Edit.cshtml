@@ -1,18 +1,15 @@
 ﻿@model Web.Application.Models.Ingredient
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Изменение";
 }
-
-<h1>Edit</h1>
-
-<h4>Ingredient</h4>
+<h4>Изменить состав</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Id"/>
             <div class="form-group">
                 <label asp-for="Product" class="control-label"></label>
                 <select asp-for="Product" class="form-control" asp-items="ViewBag.Product"></select>
@@ -28,14 +25,14 @@
                 <input asp-for="Count" class="form-control" />
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Сохранить" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Вернуться</a>
 </div>
 
 @section Scripts {
