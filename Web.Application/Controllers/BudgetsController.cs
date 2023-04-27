@@ -20,7 +20,7 @@ namespace Web.Application.Controllers
         public IActionResult Index()
         {
 
-            return View(BudgetVM.GetBudgets());
+            return View(BudgetViewModel.GetBudgets());
         }
         
         public IActionResult Edit(int? id)
@@ -30,7 +30,7 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Budget budget = BudgetVM.GetBudget(id);
+            Budget budget = BudgetViewModel.GetBudget(id);
                 
 
             return View(budget);

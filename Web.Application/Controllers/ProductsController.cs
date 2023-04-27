@@ -20,13 +20,13 @@ namespace Web.Application.Controllers
         public IActionResult Index()
         {
 
-            return View(ProductVM.GetProducts());
+            return View(ProductViewModel.GetProducts());
         }
 
         public IActionResult Create()
         {
 
-            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name");
+            ViewData["Unit"] = new SelectList(UnitViewModel.GetUnits(), "Id", "Name");
             return View();
         }
 
@@ -58,7 +58,7 @@ namespace Web.Application.Controllers
             }
 
 
-            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name");
+            ViewData["Unit"] = new SelectList(UnitViewModel.GetUnits(), "Id", "Name");
             return View(Product);
 
         }
@@ -70,10 +70,10 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Product Product = ProductVM.GetProduct(id);
+            Product Product = ProductViewModel.GetProduct(id);
 
 
-            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name", Product.Unit);
+            ViewData["Unit"] = new SelectList(UnitViewModel.GetUnits(), "Id", "Name", Product.Unit);
             return View(Product);
         }
 
@@ -118,7 +118,7 @@ namespace Web.Application.Controllers
             }
 
 
-            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name", Product.Unit);
+            ViewData["Unit"] = new SelectList(UnitViewModel.GetUnits(), "Id", "Name", Product.Unit);
             return View(Product);
         }
 
@@ -129,8 +129,8 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Product product = ProductVM.GetProduct(id);
-            Unit unit = UnitVM.GetUnit(product.Unit);
+            Product product = ProductViewModel.GetProduct(id);
+            Unit unit = UnitViewModel.GetUnit(product.Unit);
 
 
             ViewData["Unit"] = unit.Name;

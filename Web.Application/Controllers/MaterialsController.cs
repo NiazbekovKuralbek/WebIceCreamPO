@@ -16,13 +16,13 @@ namespace Web.Application.Controllers
         public IActionResult Index()
         {
             
-            return View(MaterialVM.GetMaterials());
+            return View(MaterialViewModel.GetMaterials());
         }
 
         public IActionResult Create()
         {
 
-            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name");
+            ViewData["Unit"] = new SelectList(UnitViewModel.GetUnits(), "Id", "Name");
             return View();
         }
 
@@ -53,7 +53,7 @@ namespace Web.Application.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name");
+            ViewData["Unit"] = new SelectList(UnitViewModel.GetUnits(), "Id", "Name");
             return View(material);
 
         }
@@ -65,10 +65,10 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Material material = MaterialVM.GetMaterial(id);
+            Material material = MaterialViewModel.GetMaterial(id);
 
 
-            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name", material.Unit);
+            ViewData["Unit"] = new SelectList(UnitViewModel.GetUnits(), "Id", "Name", material.Unit);
             return View(material);
         }
 
@@ -112,7 +112,7 @@ namespace Web.Application.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["Unit"] = new SelectList(UnitVM.GetUnits(), "Id", "Name", material.Unit);
+            ViewData["Unit"] = new SelectList(UnitViewModel.GetUnits(), "Id", "Name", material.Unit);
             return View(material);
         }
 
@@ -123,8 +123,8 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Material material = MaterialVM.GetMaterial(id);
-            Unit unit = UnitVM.GetUnit(material.Unit);
+            Material material = MaterialViewModel.GetMaterial(id);
+            Unit unit = UnitViewModel.GetUnit(material.Unit);
 
 
             ViewData["Unit"] = unit.Name;

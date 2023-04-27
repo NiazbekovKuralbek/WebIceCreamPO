@@ -6,7 +6,7 @@ using Web.Application.Models;
 
 namespace Web.Application.ViewModels
 {
-    public class IngredientVM
+    public class IngredientViewModel
     {
         public int Id { get; set; }
         [DisplayName("Продукт")]
@@ -16,9 +16,9 @@ namespace Web.Application.ViewModels
         [DisplayName("Кол-во")]
         public double? Count { get; set; }
 
-        public static List<IngredientVM> GetIngredients(int? product)
+        public static List<IngredientViewModel> GetIngredients(int? product)
         {
-            List<IngredientVM> ingredients = new List<IngredientVM>();
+            List<IngredientViewModel> ingredients = new List<IngredientViewModel>();
             string _query = "usp_Ingredient_SelectByProduct";
             using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
@@ -36,7 +36,7 @@ namespace Web.Application.ViewModels
                     while (reader.Read())
                     {
                         ingredients.Add(
-                            new IngredientVM()
+                            new IngredientViewModel()
                             {
                                 Id = reader.GetInt32("Id"),
                                 Product = reader.GetString("Product"),

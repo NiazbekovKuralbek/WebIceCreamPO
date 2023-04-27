@@ -7,7 +7,7 @@ using Web.Application.Models;
 
 namespace Web.Application.ViewModels
 {
-    public class EmployeeVM
+    public class EmployeeViewModel
     {
         public int Id { get; set; }
         [DisplayName("ФИО")]
@@ -23,9 +23,9 @@ namespace Web.Application.ViewModels
         
 
 
-        public static List<EmployeeVM> GetEmployees()
+        public static List<EmployeeViewModel> GetEmployees()
         {
-            List<EmployeeVM> employees = new List<EmployeeVM>();
+            List<EmployeeViewModel> employees = new List<EmployeeViewModel>();
             string _query = "SELECT * FROM dbo.[Employee_View]";
             using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
@@ -34,7 +34,7 @@ namespace Web.Application.ViewModels
                     while (reader.Read())
                     {
                         employees.Add(
-                            new EmployeeVM()
+                            new EmployeeViewModel()
                             {
                                 Id = reader.GetInt32("Id"),
                                 Name = reader.GetString("Name"),

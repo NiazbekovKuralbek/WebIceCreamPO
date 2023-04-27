@@ -6,7 +6,7 @@ using Web.Application.Models;
 
 namespace Web.Application.ViewModels
 {
-    public class BudgetVM
+    public class BudgetViewModel
     {
         public int Id { get; set; }
         [DisplayName("Бюджет")]
@@ -16,9 +16,9 @@ namespace Web.Application.ViewModels
         [DisplayName("Бонус")]
         public int? Perks { get; set; }
 
-        public static List<BudgetVM> GetBudgets()
+        public static List<BudgetViewModel> GetBudgets()
         {
-            List<BudgetVM> budgets = new List<BudgetVM>();
+            List<BudgetViewModel> budgets = new List<BudgetViewModel>();
             string _query = "SELECT * FROM dbo.Budget_View";
             using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
@@ -27,7 +27,7 @@ namespace Web.Application.ViewModels
                     while (reader.Read())
                     {
                         budgets.Add(
-                            new BudgetVM()
+                            new BudgetViewModel()
                             {
                                 Id = reader.GetInt32("Id"),
                                 BudgetAmount = reader.GetDouble("BudgetAmount"),

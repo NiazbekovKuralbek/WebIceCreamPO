@@ -20,7 +20,7 @@ namespace Web.Application.Controllers
         public IActionResult Index()
         {
 
-            return View(UnitVM.GetUnits());
+            return View(UnitViewModel.GetUnits());
         }
 
         public IActionResult Create()
@@ -141,7 +141,7 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Unit Unit = UnitVM.GetUnit(id);
+            Unit Unit = UnitViewModel.GetUnit(id);
 
 
             return View(Unit);

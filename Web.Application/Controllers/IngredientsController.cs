@@ -16,19 +16,19 @@ namespace Web.Application.Controllers
 
         public IActionResult Index(int? product)
         {
-            _product = product ?? ProductVM
+            _product = product ?? ProductViewModel
                 .GetProducts()
                 .FirstOrDefault()!.Id;
 
-            ViewData["Product"] = new SelectList(ProductVM.GetProducts(), "Id", "Name");
-            return View(IngredientVM.GetIngredients(_product));
+            ViewData["Product"] = new SelectList(ProductViewModel.GetProducts(), "Id", "Name");
+            return View(IngredientViewModel.GetIngredients(_product));
         }
 
         /// get
         public IActionResult Create()
         {
 
-            ViewData["Material"] = new SelectList(MaterialVM.GetMaterials(), "Id", "Name");
+            ViewData["Material"] = new SelectList(MaterialViewModel.GetMaterials(), "Id", "Name");
             return View();
         }
 
@@ -68,10 +68,10 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Ingredient ingredient = IngredientVM.GetIngredient(id);
+            Ingredient ingredient = IngredientViewModel.GetIngredient(id);
 
-            ViewData["Product"] = new SelectList(ProductVM.GetProducts(), "Id", "Name", ingredient.Product);
-            ViewData["Material"] = new SelectList(MaterialVM.GetMaterials(), "Id", "Name", ingredient.Material);
+            ViewData["Product"] = new SelectList(ProductViewModel.GetProducts(), "Id", "Name", ingredient.Product);
+            ViewData["Material"] = new SelectList(MaterialViewModel.GetMaterials(), "Id", "Name", ingredient.Material);
 
             return View(ingredient);
         }
@@ -115,8 +115,8 @@ namespace Web.Application.Controllers
             }
 
 
-            ViewData["Product"] = new SelectList(ProductVM.GetProducts(), "Id", "Name", ingredient.Product);
-            ViewData["Material"] = new SelectList(MaterialVM.GetMaterials(), "Id", "Name", ingredient.Material);
+            ViewData["Product"] = new SelectList(ProductViewModel.GetProducts(), "Id", "Name", ingredient.Product);
+            ViewData["Material"] = new SelectList(MaterialViewModel.GetMaterials(), "Id", "Name", ingredient.Material);
 
             return View(ingredient);
         }
@@ -128,9 +128,9 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Ingredient ingredient = IngredientVM.GetIngredient(id);
-            Product product = ProductVM.GetProduct(ingredient.Product);
-            Material material = MaterialVM.GetMaterial(ingredient.Material);
+            Ingredient ingredient = IngredientViewModel.GetIngredient(id);
+            Product product = ProductViewModel.GetProduct(ingredient.Product);
+            Material material = MaterialViewModel.GetMaterial(ingredient.Material);
 
 
             ViewData["Product"] = product.Name;

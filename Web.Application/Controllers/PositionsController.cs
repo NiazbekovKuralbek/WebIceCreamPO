@@ -20,7 +20,7 @@ namespace Web.Application.Controllers
         public IActionResult Index()
         {
 
-            return View(PositionVM.GetPositions());
+            return View(PositionViewModel.GetPositions());
         }
 
         public IActionResult Create()
@@ -64,7 +64,7 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Position Position = PositionVM.GetPosition(id);
+            Position Position = PositionViewModel.GetPosition(id);
 
 
             return View(Position);
@@ -118,7 +118,7 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Position position = PositionVM.GetPosition(id);
+            Position position = PositionViewModel.GetPosition(id);
 
 
             return View(position);

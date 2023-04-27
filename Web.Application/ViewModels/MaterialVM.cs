@@ -6,7 +6,7 @@ using Web.Application.Models;
 
 namespace Web.Application.ViewModels
 {
-    public class MaterialVM
+    public class MaterialViewModel
     {
         public int Id { get; set; }
         [DisplayName("Сырьё")]
@@ -20,9 +20,9 @@ namespace Web.Application.ViewModels
         [DisplayName("Себестоимость")]
         public double? Cost { get; set; }
 
-        public static List<MaterialVM> GetMaterials()
+        public static List<MaterialViewModel> GetMaterials()
         {
-            List<MaterialVM> materials = new List<MaterialVM>();
+            List<MaterialViewModel> materials = new List<MaterialViewModel>();
             string _query = "SELECT * FROM dbo.Material_View";
             using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
@@ -31,7 +31,7 @@ namespace Web.Application.ViewModels
                     while (reader.Read())
                     {
                         materials.Add(
-                            new MaterialVM()
+                            new MaterialViewModel()
                             {
                                 Id = reader.GetInt32("Id"),
                                 Name = reader.GetString("Name"),

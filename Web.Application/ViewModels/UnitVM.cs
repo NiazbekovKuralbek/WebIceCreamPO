@@ -6,15 +6,15 @@ using Web.Application.Models;
 
 namespace Web.Application.ViewModels
 {
-    public class UnitVM
+    public class UnitViewModel
     {
         public int Id { get; set; }
         [DisplayName("Название еденицы")]
         public string? Name { get; set; }
 
-        public static List<UnitVM> GetUnits()
+        public static List<UnitViewModel> GetUnits()
         {
-            List<UnitVM> units = new List<UnitVM>();
+            List<UnitViewModel> units = new List<UnitViewModel>();
            string  _query = "SELECT * FROM dbo.Unit_View";
             using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
@@ -23,7 +23,7 @@ namespace Web.Application.ViewModels
                     while (reader.Read())
                     {
                         units.Add(
-                            new UnitVM()
+                            new UnitViewModel()
                             {
                                 Id = reader.GetInt32("Id"),
                                 Name = reader.GetString("Name")

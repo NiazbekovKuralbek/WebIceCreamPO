@@ -19,13 +19,13 @@ namespace Web.Application.Controllers
 
         public IActionResult Index()
         {
-            return View(SaleProductVM.GetSaleProducts());
+            return View(SaleProductViewModel.GetSaleProducts());
         }
 
         public IActionResult Create()
         {
-            ViewData["Employee"] = new SelectList(EmployeeVM.GetEmployees(), "Id", "Name");
-            ViewData["Product"] = new SelectList(ProductVM.GetProducts(), "Id", "Name");
+            ViewData["Employee"] = new SelectList(EmployeeViewModel.GetEmployees(), "Id", "Name");
+            ViewData["Product"] = new SelectList(ProductViewModel.GetProducts(), "Id", "Name");
             return View();
         }
         

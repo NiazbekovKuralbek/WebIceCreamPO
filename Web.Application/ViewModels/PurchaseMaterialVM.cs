@@ -5,7 +5,7 @@ using Web.Application.Data;
 
 namespace Web.Application.ViewModels
 {
-    public class PurchaseMaterialVM
+    public class PurchaseMaterialViewModel
     {
         public int Id { get; set; }
 
@@ -21,9 +21,9 @@ namespace Web.Application.ViewModels
         [DisplayName("Сотрудник")]
         public string? Employee { get; set; }
 
-        public static List<PurchaseMaterialVM> GetPurchaseMaterials()
+        public static List<PurchaseMaterialViewModel> GetPurchaseMaterials()
         {
-            List<PurchaseMaterialVM> purchaseMaterials = new List<PurchaseMaterialVM>();
+            List<PurchaseMaterialViewModel> purchaseMaterials = new List<PurchaseMaterialViewModel>();
             string _query = "SELECT * FROM dbo.PurchaseMaterial_View";
             using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
@@ -32,7 +32,7 @@ namespace Web.Application.ViewModels
                     while (reader.Read())
                     {
                         purchaseMaterials.Add(
-                            new PurchaseMaterialVM()
+                            new PurchaseMaterialViewModel()
                             {
                                 Id = reader.GetInt32("Id"),
                                 Material = reader.GetString("Material"),

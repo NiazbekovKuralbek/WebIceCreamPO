@@ -19,13 +19,13 @@ namespace Web.Application.Controllers
 
         public IActionResult Index()
         {
-            return View(PurchaseMaterialVM.GetPurchaseMaterials());
+            return View(PurchaseMaterialViewModel.GetPurchaseMaterials());
         }
         
         public IActionResult Create()
         {
-            ViewData["Employee"] = new SelectList(EmployeeVM.GetEmployees(), "Id", "Name");
-            ViewData["Material"] = new SelectList(MaterialVM.GetMaterials(), "Id", "Name");
+            ViewData["Employee"] = new SelectList(EmployeeViewModel.GetEmployees(), "Id", "Name");
+            ViewData["Material"] = new SelectList(MaterialViewModel.GetMaterials(), "Id", "Name");
 
             return View();
         }
@@ -64,8 +64,8 @@ namespace Web.Application.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["Employee"] = new SelectList(EmployeeVM.GetEmployees(), "Id", "Name", purchaseMaterial.Employee);
-            ViewData["Material"] = new SelectList(MaterialVM.GetMaterials(), "Id", "Name", purchaseMaterial.Material);
+            ViewData["Employee"] = new SelectList(EmployeeViewModel.GetEmployees(), "Id", "Name", purchaseMaterial.Employee);
+            ViewData["Material"] = new SelectList(MaterialViewModel.GetMaterials(), "Id", "Name", purchaseMaterial.Material);
             return View(purchaseMaterial);
         }
 

@@ -15,13 +15,13 @@ namespace Web.Application.Controllers
         public IActionResult Index()
         {
 
-            return View(EmployeeVM.GetEmployees());
+            return View(EmployeeViewModel.GetEmployees());
         }
         
         public IActionResult Create()
         {
 
-            ViewData["Position"] = new SelectList(PositionVM.GetPositions(), "Id", "Name");
+            ViewData["Position"] = new SelectList(PositionViewModel.GetPositions(), "Id", "Name");
             return View();
         }
         
@@ -54,7 +54,7 @@ namespace Web.Application.Controllers
             }
 
 
-            ViewData["Position"] = new SelectList(PositionVM.GetPositions(), "Id", "Name");
+            ViewData["Position"] = new SelectList(PositionViewModel.GetPositions(), "Id", "Name");
             return View();
         }
         
@@ -65,10 +65,10 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Employee employee = EmployeeVM.GetEmployee(id);
+            Employee employee = EmployeeViewModel.GetEmployee(id);
 
 
-            ViewData["Position"] = new SelectList(PositionVM.GetPositions(), "Id", "Name", employee.Position);
+            ViewData["Position"] = new SelectList(PositionViewModel.GetPositions(), "Id", "Name", employee.Position);
             return View(employee);
         }
         
@@ -109,7 +109,7 @@ namespace Web.Application.Controllers
             }
 
 
-            ViewData["Position"] = new SelectList(PositionVM.GetPositions(), "Id", "Name", employee.Position);
+            ViewData["Position"] = new SelectList(PositionViewModel.GetPositions(), "Id", "Name", employee.Position);
             return RedirectToAction(nameof(Index));
         }
         
@@ -120,8 +120,8 @@ namespace Web.Application.Controllers
                 return NotFound();
             }
 
-            Employee employee = EmployeeVM.GetEmployee(id);
-            Position position = PositionVM.GetPosition(employee.Position);
+            Employee employee = EmployeeViewModel.GetEmployee(id);
+            Position position = PositionViewModel.GetPosition(employee.Position);
 
 
             ViewData["Position"] = position.Name;

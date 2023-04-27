@@ -6,15 +6,15 @@ using Web.Application.Models;
 
 namespace Web.Application.ViewModels
 {
-    public class PositionVM
+    public class PositionViewModel
     {
         public int Id { get; set; }
         [DisplayName("Должности")]
         public string? Name { get; set; }
 
-        public static List<PositionVM> GetPositions()
+        public static List<PositionViewModel> GetPositions()
         {
-            List<PositionVM> positions = new List<PositionVM>();
+            List<PositionViewModel> positions = new List<PositionViewModel>();
             string _query = "SELECT * FROM dbo.[Position_View]";
             using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
@@ -23,7 +23,7 @@ namespace Web.Application.ViewModels
                     while (reader.Read())
                     {
                         positions.Add(
-                            new PositionVM()
+                            new PositionViewModel()
                             {
                                 Id = reader.GetInt32("Id"),
                                 Name = reader.GetString("Name")
