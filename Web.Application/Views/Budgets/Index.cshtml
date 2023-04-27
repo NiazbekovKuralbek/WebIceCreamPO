@@ -1,39 +1,38 @@
 ﻿@model IEnumerable<Web.Application.ViewModels.BudgetVM>
-
 @{
-    ViewData["Title"] = "Index";
-}
+    ViewData["Title"] = "Бюджет"; <!-- Установка заголовка страницы -->
+}<!-- Определение модели представления -->
 
-<h1>Index</h1>
+<h1>Бюджет</h1>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.BudgetAmount)
+                @Html.DisplayNameFor(model => model.BudgetAmount) <!-- Отображение названия столбца в таблице -->
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Percent)
+                @Html.DisplayNameFor(model => model.Percent) <!-- Отображение названия столбца в таблице -->
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Perks)
+                @Html.DisplayNameFor(model => model.Perks) <!-- Отображение названия столбца в таблице -->
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model) { <!-- Отображение каждой записи в таблице -->
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.BudgetAmount)
+                @Html.DisplayFor(modelItem => item.BudgetAmount) <!-- Отображение значения в ячейке таблицы -->
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Percent)
+                @Html.DisplayFor(modelItem => item.Percent) <!-- Отображение значения в ячейке таблицы -->
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Perks)
+                @Html.DisplayFor(modelItem => item.Perks) <!-- Отображение значения в ячейке таблицы -->
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> <!-- Создание ссылки на страницу редактирования записи -->
             </td>
         </tr>
 }

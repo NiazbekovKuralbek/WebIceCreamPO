@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.ComponentModel;
 using System.Data;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -8,8 +9,11 @@ namespace Web.Application.ViewModels
     public class IngredientVM
     {
         public int Id { get; set; }
+        [DisplayName("Продукт")]
         public string? Product { get; set; }
+        [DisplayName("Сырьё")]
         public string? Material { get; set; }
+        [DisplayName("Кол-во")]
         public double? Count { get; set; }
 
         public static List<IngredientVM> GetIngredients(int? product)

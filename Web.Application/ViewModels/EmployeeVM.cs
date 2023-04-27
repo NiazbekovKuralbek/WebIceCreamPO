@@ -1,4 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -8,11 +10,17 @@ namespace Web.Application.ViewModels
     public class EmployeeVM
     {
         public int Id { get; set; }
+        [DisplayName("ФИО")]
         public string? Name { get; set; }
+        [DisplayName("Должность")]
         public string? Position { get; set; }
+        [DisplayName("Зарплата")]
         public double? Salary { get; set; }
+        [DisplayName("Адрес")]
         public string? Address { get; set; }
+        [DisplayName("НомерТелефона")]
         public string? PhoneNumber { get; set; }
+        
 
 
         public static List<EmployeeVM> GetEmployees()

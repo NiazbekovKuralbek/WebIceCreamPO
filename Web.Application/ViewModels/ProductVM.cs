@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.ComponentModel;
 using System.Data;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -8,10 +9,15 @@ namespace Web.Application.ViewModels
     public class ProductVM
     {
         public int Id { get; set; }
+        [DisplayName("Название")]
         public string? Name { get; set; }
+        [DisplayName("Ед.Измерение")]
         public string? Unit { get; set; }
+        [DisplayName("Кол-во")]
         public double? Count { get; set; }
+        [DisplayName("Цена")]
         public double? Amount { get; set; }
+        [DisplayName("Себестоимость")]
         public double? Cost { get; set; }
         
         public static List<ProductVM> GetProducts()

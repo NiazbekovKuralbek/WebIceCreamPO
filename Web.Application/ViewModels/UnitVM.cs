@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.ComponentModel;
 using System.Data;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -8,6 +9,7 @@ namespace Web.Application.ViewModels
     public class UnitVM
     {
         public int Id { get; set; }
+        [DisplayName("Название еденицы")]
         public string? Name { get; set; }
 
         public static List<UnitVM> GetUnits()

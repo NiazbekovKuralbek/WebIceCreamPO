@@ -8,6 +8,7 @@ namespace Web.Application.Models
     {
         public int Id { get; set; }
         [Required]
+        [Display(Name = "Название Ед.Измерения")]
         public string? Name { get; set; }
     }
 }

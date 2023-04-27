@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.ComponentModel;
 using System.Data;
 using Web.Application.Data;
 using Web.Application.Models;
@@ -8,8 +9,11 @@ namespace Web.Application.ViewModels
     public class BudgetVM
     {
         public int Id { get; set; }
+        [DisplayName("Бюджет")]
         public double? BudgetAmount { get; set; }
+        [DisplayName("Процент")]
         public int? Percent { get; set; }
+        [DisplayName("Бонус")]
         public int? Perks { get; set; }
 
         public static List<BudgetVM> GetBudgets()

@@ -53,11 +53,11 @@
       "MessagePackAnalyzer/2.1.152": {
         "type": "package"
       },
-      "Microsoft.AspNet.Mvc/5.2.9": {
+      "Microsoft.AspNet.Mvc/5.3.0-preview1": {
         "type": "package",
         "dependencies": {
-          "Microsoft.AspNet.Razor": "[3.2.9, 3.3.0)",
-          "Microsoft.AspNet.WebPages": "[3.2.9, 3.3.0)"
+          "Microsoft.AspNet.Razor": "[3.3.0-preview1, 3.3.0)",
+          "Microsoft.AspNet.WebPages": "[3.3.0-preview1, 3.3.0)"
         },
         "compile": {
           "lib/net45/System.Web.Mvc.dll": {
@@ -70,7 +70,7 @@
           }
         }
       },
-      "Microsoft.AspNet.Razor/3.2.9": {
+      "Microsoft.AspNet.Razor/3.3.0-preview1": {
         "type": "package",
         "compile": {
           "lib/net45/System.Web.Razor.dll": {
@@ -83,10 +83,10 @@
           }
         }
       },
-      "Microsoft.AspNet.WebPages/3.2.9": {
+      "Microsoft.AspNet.WebPages/3.3.0-preview1": {
         "type": "package",
         "dependencies": {
-          "Microsoft.AspNet.Razor": "[3.2.9, 3.3.0)",
+          "Microsoft.AspNet.Razor": "[3.3.0-preview1, 3.3.0)",
           "Microsoft.Web.Infrastructure": "1.0.0"
         },
         "compile": {
@@ -3669,10 +3669,10 @@
         "tools/uninstall.ps1"
       ]
     },
-    "Microsoft.AspNet.Mvc/5.2.9": {
-      "sha512": "bcekKshCAh7kTWSMZPavQStSZQF/QmjEjO2gVWGITEd0/t5eRlb+ZLDE+az2qY1bZ8L6Hz0OCNeS0uzXtJcK5w==",
+    "Microsoft.AspNet.Mvc/5.3.0-preview1": {
+      "sha512": "LMCqCwO0e3ZUH5DRcankzs8vK2QK7NWQn0pbZc84mVl0p9Nafniw4GZdnPSwnq6cC3x5N7v24KqSUVRqsPj4lw==",
       "type": "package",
-      "path": "microsoft.aspnet.mvc/5.2.9",
+      "path": "microsoft.aspnet.mvc/5.3.0-preview1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3682,14 +3682,14 @@
         "NET_Library_EULA_ENU.txt",
         "lib/net45/System.Web.Mvc.dll",
         "lib/net45/System.Web.Mvc.xml",
-        "microsoft.aspnet.mvc.5.2.9.nupkg.sha512",
+        "microsoft.aspnet.mvc.5.3.0-preview1.nupkg.sha512",
         "microsoft.aspnet.mvc.nuspec"
       ]
     },
-    "Microsoft.AspNet.Razor/3.2.9": {
-      "sha512": "QOJEnEw3xp+t5lMvYR5nGCF4CfZpHqr2p8uZOBEgDZoB6r2txtSj6581YNr+/dOHjI3YRlo1QAKGQoSohbQ/KA==",
+    "Microsoft.AspNet.Razor/3.3.0-preview1": {
+      "sha512": "ZpBaNT8E8hQ1wIPh84tud9U3t14UK1OFUo0znnUyasmmO1oydhrZMmc+NXYHRJPEQ36nPp69653ZcNn1zUeu/A==",
       "type": "package",
-      "path": "microsoft.aspnet.razor/3.2.9",
+      "path": "microsoft.aspnet.razor/3.3.0-preview1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3697,14 +3697,14 @@
         "NET_Library_EULA_ENU.txt",
         "lib/net45/System.Web.Razor.dll",
         "lib/net45/System.Web.Razor.xml",
-        "microsoft.aspnet.razor.3.2.9.nupkg.sha512",
+        "microsoft.aspnet.razor.3.3.0-preview1.nupkg.sha512",
         "microsoft.aspnet.razor.nuspec"
       ]
     },
-    "Microsoft.AspNet.WebPages/3.2.9": {
-      "sha512": "yByb721lwv8YFsx1oKA5CLKXa89XVbVMkPafS4bg/bPelBEgChq/coFBQEkA4kwcabG7AR56w3vapnoZUfr2Cw==",
+    "Microsoft.AspNet.WebPages/3.3.0-preview1": {
+      "sha512": "L6ALbvp6YdqT6vtqQ+1kE5DOfpXCUPtBiH5qwbbUUjGFY550UHAhYdFf+1aEuKaDMiM0rm8X6gyHJcVgzjUhqw==",
       "type": "package",
-      "path": "microsoft.aspnet.webpages/3.2.9",
+      "path": "microsoft.aspnet.webpages/3.3.0-preview1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3720,7 +3720,7 @@
         "lib/net45/System.Web.WebPages.Razor.xml",
         "lib/net45/System.Web.WebPages.dll",
         "lib/net45/System.Web.WebPages.xml",
-        "microsoft.aspnet.webpages.3.2.9.nupkg.sha512",
+        "microsoft.aspnet.webpages.3.3.0-preview1.nupkg.sha512",
         "microsoft.aspnet.webpages.nuspec"
       ]
     },
@@ -10152,7 +10152,7 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "Microsoft.AspNet.Mvc >= 5.2.9",
+      "Microsoft.AspNet.Mvc >= 5.3.0-preview1",
       "Microsoft.EntityFrameworkCore >= 6.0.15",
       "Microsoft.EntityFrameworkCore.Design >= 6.0.15",
       "Microsoft.EntityFrameworkCore.SqlServer >= 6.0.15",
@@ -10206,7 +10206,7 @@
         "dependencies": {
           "Microsoft.AspNet.Mvc": {
             "target": "Package",
-            "version": "[5.2.9, )"
+            "version": "[5.3.0-preview1, )"
           },
           "Microsoft.EntityFrameworkCore": {
             "target": "Package",
@@ -10261,7 +10261,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Пакет \"Microsoft.AspNet.Mvc 5.2.9\" был восстановлен с помощью \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\", а не целевой платформы проекта \"net6.0\". Этот пакет может быть не полностью совместим с вашим проектом.",
+      "message": "Пакет \"Microsoft.AspNet.Mvc 5.3.0-preview1\" был восстановлен с помощью \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\", а не целевой платформы проекта \"net6.0\". Этот пакет может быть не полностью совместим с вашим проектом.",
       "libraryId": "Microsoft.AspNet.Mvc",
       "targetGraphs": [
         "net6.0"
@@ -10271,7 +10271,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Пакет \"Microsoft.AspNet.Razor 3.2.9\" был восстановлен с помощью \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\", а не целевой платформы проекта \"net6.0\". Этот пакет может быть не полностью совместим с вашим проектом.",
+      "message": "Пакет \"Microsoft.AspNet.Razor 3.3.0-preview1\" был восстановлен с помощью \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\", а не целевой платформы проекта \"net6.0\". Этот пакет может быть не полностью совместим с вашим проектом.",
       "libraryId": "Microsoft.AspNet.Razor",
       "targetGraphs": [
         "net6.0"
@@ -10281,7 +10281,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Пакет \"Microsoft.AspNet.WebPages 3.2.9\" был восстановлен с помощью \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\", а не целевой платформы проекта \"net6.0\". Этот пакет может быть не полностью совместим с вашим проектом.",
+      "message": "Пакет \"Microsoft.AspNet.WebPages 3.3.0-preview1\" был восстановлен с помощью \".NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1\", а не целевой платформы проекта \"net6.0\". Этот пакет может быть не полностью совместим с вашим проектом.",
       "libraryId": "Microsoft.AspNet.WebPages",
       "targetGraphs": [
         "net6.0"
