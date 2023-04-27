@@ -19,6 +19,9 @@
                 <input asp-for="Count" class="form-control" />
                 <span asp-validation-for="Count" class="text-danger"></span>
             </div>
+            <div>
+                @ViewBag.Alredy
+            </div>
             <div class="form-group">
                 <input type="submit" value="Добавить" class="btn btn-primary" />
             </div>
@@ -27,7 +30,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Вернутся</a>
+    <a asp-action="Index" asp-route-product="@ViewBag._product">Вернутся</a>
 </div>
 
 @section Scripts {

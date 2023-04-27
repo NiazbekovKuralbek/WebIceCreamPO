@@ -27,6 +27,7 @@ namespace Web.Application.Controllers
         /// get
         public IActionResult Create()
         {
+            ViewData["_product"] = _product;
 
             ViewData["Material"] = new SelectList(MaterialViewModel.GetMaterials(), "Id", "Name");
             return View();
@@ -36,26 +37,35 @@ namespace Web.Application.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Ingredient ingredient)
         {
+            ViewData["_product"] = _product;
             if (ModelState.IsValid)
             {
-                _query = "usp_Ingredient_Insert";
-                using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
+                try
                 {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-
-                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    // Если записи еще нет, то добавляем ее
+                    _query = "usp_Ingredient_Insert";
+                    using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                     {
-                        new SqlParameter("@product", _product),
-                        new SqlParameter("@material", ingredient.Material),
-                        new SqlParameter("@count", ingredient.Count)
-                    };
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
 
-                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
-                    sqlCommand.ExecuteNonQuery();
+                        List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                        {
+                            new SqlParameter("@product", _product),
+                            new SqlParameter("@material", ingredient.Material),
+                            new SqlParameter("@count", ingredient.Count)
+                        };
+
+                        sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                        sqlCommand.ExecuteNonQuery();
+                    }
                 }
-                    
-
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex)
+                {
+                    ViewData["Alredy"] = "Данная сырьё уже присутствует в ингридиенте";
+                    ViewData["Product"] = new SelectList(ProductViewModel.GetProducts(), "Id", "Name", ingredient.Product);
+                    ViewData["Material"] = new SelectList(MaterialViewModel.GetMaterials(), "Id", "Name", ingredient.Material); return View(ingredient);
+                }
+                return RedirectToAction(nameof(Index), new { product = _product});
             }
 
             return View(ingredient);
@@ -63,6 +73,7 @@ namespace Web.Application.Controllers
 
         public IActionResult Edit(int? id)
         {
+            ViewData["_product"] = _product;
             if (id == null)
             {
                 return NotFound();
@@ -80,6 +91,7 @@ namespace Web.Application.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Ingredient ingredient)
         {
+            ViewData["_product"] = _product;
             if (id != ingredient.Id)
             {
                 return NotFound();
@@ -111,7 +123,7 @@ namespace Web.Application.Controllers
                 {
                     return NotFound();
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { product = _product });
             }
 
 
@@ -123,6 +135,7 @@ namespace Web.Application.Controllers
 
         public IActionResult Delete(int? id)
         {
+            ViewData["_product"] = _product;
             if (id == null)
             {
                 return NotFound();
@@ -142,6 +155,7 @@ namespace Web.Application.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
+            ViewData["_product"] = _product;
             _query = "usp_Ingredient_Delete";
             using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
@@ -156,7 +170,7 @@ namespace Web.Application.Controllers
                 sqlCommand.ExecuteNonQuery();
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { product = _product });
         }
     }
 }
