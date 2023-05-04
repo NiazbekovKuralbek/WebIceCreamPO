@@ -1,12 +1,9 @@
 ﻿@model Web.Application.Models.PurchaseMaterial
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Закупка";
 }
-
-<h1>Create</h1>
-
-<h4>PurchaseMaterial</h4>
+<h4>Закупаем сырьё: </h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -36,7 +33,7 @@
                 <select asp-for="Employee" class ="form-control" asp-items="ViewBag.Employee"></select>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Закупить" class="btn btn-primary" />
             </div>
         </form>
     </div>

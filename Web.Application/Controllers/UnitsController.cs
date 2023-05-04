@@ -65,7 +65,7 @@ namespace Web.Application.Controllers
             }
 
             Unit Unit;
-            _query = "Unit_SelectById";
+            _query = "usp_Unit_SelectById";
             using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
             {
                 sqlCommand.CommandType = CommandType.StoredProcedure;
