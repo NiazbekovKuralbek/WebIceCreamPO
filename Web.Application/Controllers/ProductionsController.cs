@@ -35,27 +35,38 @@ namespace Web.Application.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Production production)
         {
+            int retrurn_value = 0;
+             
             if (ModelState.IsValid)
             {
-                _query = "usp_Production_Insert";
-                using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
+                try
                 {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-
-                    List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    _query = "usp_Production_Insert";
+                    using (SqlCommand sqlCommand = new SqlCommand(_query, DataBaseContext.Connection))
                     {
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                        List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                    {
+                        new SqlParameter("return_value", retrurn_value) { Direction = ParameterDirection.ReturnValue},
                         new SqlParameter("@product", production.Product),
                         new SqlParameter("@productCount", production.Count),
                         new SqlParameter("@productionDate", production.ProductionDate),
                         new SqlParameter("@employee", production.Employee)
                     };
+                        /*добавить условие проверки return_value*/
+
+                        sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                        sqlCommand.ExecuteNonQuery();
+                    }
 
 
-                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
-                    sqlCommand.ExecuteNonQuery();
+                    return RedirectToAction(nameof(Index));
                 }
-
-                return RedirectToAction(nameof(Index));
+                catch (Exception ex) 
+                {
+                    ViewData["Alredy"] = "Не хватает сырья!";
+                }
             }
 
 

@@ -13,7 +13,7 @@ namespace Web.Application.Models
         [Required]
         [Display(Name = "Кол-во")]
         public double? Count { get; set; }
-        [Required]
+      
         [Display(Name = "Цена")]
         public double? Amount { get; set; }
         [Required]
